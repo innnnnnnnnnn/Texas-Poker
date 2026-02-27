@@ -422,54 +422,78 @@ const GameBoard: React.FC<GameBoardProps> = ({ initialGameState, playerIndex, so
                 🚪
             </button>
 
-            {/* 🏆 Hand Result Overlay (Settlement) */}
+            {/* 🏆 原子化極致緊湊結算控制區 (Atomic Hand Result Overlay) */}
             {gameState.isFinished && !showTournamentVictory && (
                 <div className="fixed inset-0 z-[500] bg-black/40 backdrop-blur-sm flex items-center justify-center p-4">
-                    <div className="w-full max-w-sm bg-black/80 backdrop-blur-3xl rounded-3xl p-6 border border-yellow-500/50 shadow-[0_0_50px_rgba(234,179,8,0.3)] animate-in fade-in zoom-in duration-300">
-                        <div className="text-center mb-6">
-                            <div className="text-[10px] text-yellow-500/60 font-black uppercase tracking-widest mb-1">
-                                本局結算 (Hand Settlement)
-                            </div>
-                            <h2 className="text-white text-2xl font-black">恭喜贏家！</h2>
+                    <div className="w-full max-w-sm md:max-w-md bg-black/90 backdrop-blur-3xl rounded-[32px] p-8 border border-yellow-500/30 shadow-[0_0_80px_rgba(234,179,8,0.2)] animate-in fade-in zoom-in duration-300 flex flex-col items-center text-center">
+
+                        {/* 獲勝宣告組 (Winning Announcement Group) */}
+                        <div className="mb-0.5 text-[10px] text-yellow-500/40 font-black uppercase tracking-[0.2em] animate-pulse">
+                            🎊 Showdown 🎊
                         </div>
 
-                        <div className="space-y-4 mb-8">
-                            {gameState.winners.map((w, idx) => {
-                                const player = gameState.players.find(p => p.id === w.playerId);
-                                return (
-                                    <div key={idx} className="bg-white/5 border border-white/10 rounded-2xl p-4 flex items-center justify-between group hover:bg-white/10 transition-all">
-                                        <div className="flex items-center space-x-3">
-                                            <div className="w-10 h-10 rounded-full bg-yellow-500 flex items-center justify-center text-xl shadow-lg">
-                                                {player?.isHuman ? '👤' : '🤖'}
-                                            </div>
-                                            <div>
-                                                <div className="text-white font-black text-sm">{player?.name || 'Unknown'}</div>
-                                                <div className="text-yellow-500/60 text-[10px] font-bold uppercase">{w.handName || 'High Card'}</div>
-                                            </div>
-                                        </div>
-                                        <div className="text-right">
-                                            <div className="text-yellow-500 font-black text-xl">
-                                                +${w.amount.toLocaleString()}
-                                            </div>
-                                            <div className="text-[9px] text-white/20 uppercase tracking-tighter">Winner</div>
-                                        </div>
+                        <div className="flex items-center space-x-2 mb-0.5">
+                            <div className="w-6 h-6 rounded-full bg-yellow-500 flex items-center justify-center text-xs shadow-lg">
+                                {gameState.winners[0]?.playerId && gameState.players.find(p => p.id === gameState.winners[0].playerId)?.isHuman ? '👤' : '🤖'}
+                            </div>
+                            <h2 className="text-white text-xl font-black tracking-tight">
+                                {gameState.winners[0]
+                                    ? (gameState.players.find(p => p.id === gameState.winners[0].playerId)?.name || "贏家")
+                                    : "無人獲勝"}
+                            </h2>
+                        </div>
+
+                        <div className="text-yellow-500 font-black text-3xl mb-3 drop-shadow-[0_2px_10px_rgba(234,179,8,0.4)]">
+                            + {gameState.winners[0]?.amount.toLocaleString() || 0} 💰
+                        </div>
+
+                        {/* 對局詳情組 (Hand Details Group) */}
+                        <div className="flex flex-col items-center w-full">
+                            {/* 決戰五張牌 (Winning Cards) */}
+                            <div className="flex -space-x-4 md:-space-x-6 origin-top scale-[0.65] md:scale-75 mb-0">
+                                {gameState.winners[0]?.cards ? (
+                                    gameState.winners[0].cards.map((c, i) => (
+                                        <Card key={i} card={c} className="shadow-2xl ring-2 ring-white/10" />
+                                    ))
+                                ) : (
+                                    gameState.communityCards.map((c, i) => (
+                                        <Card key={i} card={c} className="shadow-2xl ring-2 ring-white/10 opacity-50" />
+                                    ))
+                                )}
+                            </div>
+
+                            {/* 牌型名稱 (Hand Name) - 精密緊貼 mt-[-28px] */}
+                            <div className="mt-[-28px] md:mt-[-35px] text-yellow-500/80 font-black text-sm uppercase tracking-widest leading-none bg-black/80 px-4 py-1.5 rounded-full border border-yellow-500/20 backdrop-blur-md z-10">
+                                ( {gameState.winners[0]?.handName || "高牌"} )
+                            </div>
+                        </div>
+
+                        {/* 分割空間 */}
+                        <div className="h-6" />
+
+                        {/* 動作按鈕組 (Action Buttons) */}
+                        <div className="flex flex-col gap-3 w-full">
+                            <div className="grid grid-cols-2 gap-3 w-full">
+                                <button
+                                    onClick={onExit}
+                                    className="py-4 bg-white/5 hover:bg-white/10 text-white/60 hover:text-white font-black rounded-2xl border border-white/5 transition-all active:scale-95 text-xs uppercase tracking-widest"
+                                >
+                                    EXIT
+                                </button>
+                                {isHost ? (
+                                    <button
+                                        onClick={onNextGame}
+                                        className="py-4 bg-yellow-500 hover:bg-yellow-400 text-black font-black rounded-2xl shadow-xl shadow-yellow-500/20 transition-all active:scale-95 text-xs uppercase tracking-widest border-b-4 border-yellow-700"
+                                    >
+                                        NEXT
+                                    </button>
+                                ) : (
+                                    <div className="flex items-center justify-center py-4 bg-black/40 text-yellow-500/40 font-black rounded-2xl border border-yellow-500/10 text-[10px] italic">
+                                        WAIT HOST...
                                     </div>
-                                );
-                            })}
-                        </div>
-
-                        {isHost ? (
-                            <button
-                                onClick={onNextGame}
-                                className="w-full py-4 bg-yellow-500 hover:bg-yellow-400 text-black font-black rounded-2xl shadow-xl shadow-yellow-500/20 transition-all active:scale-95 text-sm uppercase tracking-widest"
-                            >
-                                下一局 (Next Hand)
-                            </button>
-                        ) : (
-                            <div className="text-center text-white/40 text-xs font-bold italic animate-pulse">
-                                等待房主啟動下一局...
+                                )}
                             </div>
-                        )}
+                        </div>
                     </div>
                 </div>
             )}
