@@ -18,15 +18,6 @@ export const metadata: Metadata = {
   description: "A premium web-based Texas Hold'em Poker game.",
 };
 
-export const viewport = {
-  themeColor: "#000000",
-  width: "device-width",
-  initialScale: 1,
-  maximumScale: 1,
-  userScalable: false,
-  viewportFit: "cover",
-};
-
 export default function RootLayout({
   children,
 }: Readonly<{

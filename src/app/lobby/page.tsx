@@ -28,7 +28,7 @@ const LobbyPage = () => {
     };
 
     return (
-        <div className="h-screen bg-black p-4 md:p-8 flex flex-col items-center justify-center overflow-hidden">
+        <div className="h-screen bg-[#0a4d2e] p-4 md:p-8 flex flex-col items-center justify-center overflow-hidden">
             <div className="w-full max-w-4xl flex flex-col md:flex-row justify-between items-center mb-6 md:mb-12 gap-4">
                 <h1 className="text-2xl md:text-3xl font-black text-yellow-500">大廳 Lobby</h1>
                 <div className="flex items-center space-x-4 bg-black/30 p-3 md:p-4 rounded-2xl border border-white/10">
