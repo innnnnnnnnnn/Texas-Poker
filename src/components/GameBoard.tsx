@@ -502,12 +502,15 @@ const GameBoard: React.FC<GameBoardProps> = ({ initialGameState, playerIndex, so
             )}
             {/* Tournament Victory Overlay */}
             {showTournamentVictory && (
-                <div className="fixed inset-0 z-[1000] bg-black flex flex-col items-center justify-start animate-in fade-in duration-300 overflow-y-auto">
+                <div className="fixed inset-0 z-[99999] bg-black flex flex-col items-center justify-start animate-in fade-in duration-300 overflow-y-auto">
+                    {/* Extra backdrop to ensure notch coverage on some browsers */}
+                    <div className="absolute inset-x-0 -top-20 h-20 bg-black z-[-1]" />
+
                     <div className="w-full flex flex-col items-center">
-                        {/* (A) 🏆 Trophy Area: 15% - 35% height */}
-                        <div className="relative mt-[15vh] flex flex-col items-center justify-center">
-                            <div className="absolute inset-0 bg-yellow-500/20 blur-[10vw] rounded-full scale-150 animate-pulse" />
-                            <div className="text-[25vw] md:text-[20vh] drop-shadow-[0_0_5vw_rgba(234,179,8,0.8)] relative z-10 leading-none">
+                        {/* (A) 🏆 Trophy Area: Enlarged & Optimized */}
+                        <div className="relative mt-[12vh] flex flex-col items-center justify-center">
+                            <div className="absolute inset-0 bg-yellow-500/20 blur-[12vw] rounded-full scale-150 animate-pulse" />
+                            <div className="text-[35vw] md:text-[25vh] drop-shadow-[0_0_8vw_rgba(234,179,8,1)] relative z-10 leading-none">
                                 🏆
                             </div>
                         </div>
