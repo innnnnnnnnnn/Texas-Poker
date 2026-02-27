@@ -422,7 +422,57 @@ const GameBoard: React.FC<GameBoardProps> = ({ initialGameState, playerIndex, so
                 🚪
             </button>
 
-            {/* Result Overlay (Same Pos as Action Bar) */}
+            {/* 🏆 Hand Result Overlay (Settlement) */}
+            {gameState.isFinished && !showTournamentVictory && (
+                <div className="fixed inset-0 z-[500] bg-black/40 backdrop-blur-sm flex items-center justify-center p-4">
+                    <div className="w-full max-w-sm bg-black/80 backdrop-blur-3xl rounded-3xl p-6 border border-yellow-500/50 shadow-[0_0_50px_rgba(234,179,8,0.3)] animate-in fade-in zoom-in duration-300">
+                        <div className="text-center mb-6">
+                            <div className="text-[10px] text-yellow-500/60 font-black uppercase tracking-widest mb-1">
+                                本局結算 (Hand Settlement)
+                            </div>
+                            <h2 className="text-white text-2xl font-black">恭喜贏家！</h2>
+                        </div>
+
+                        <div className="space-y-4 mb-8">
+                            {gameState.winners.map((w, idx) => {
+                                const player = gameState.players.find(p => p.id === w.playerId);
+                                return (
+                                    <div key={idx} className="bg-white/5 border border-white/10 rounded-2xl p-4 flex items-center justify-between group hover:bg-white/10 transition-all">
+                                        <div className="flex items-center space-x-3">
+                                            <div className="w-10 h-10 rounded-full bg-yellow-500 flex items-center justify-center text-xl shadow-lg">
+                                                {player?.isHuman ? '👤' : '🤖'}
+                                            </div>
+                                            <div>
+                                                <div className="text-white font-black text-sm">{player?.name || 'Unknown'}</div>
+                                                <div className="text-yellow-500/60 text-[10px] font-bold uppercase">{w.handName || 'High Card'}</div>
+                                            </div>
+                                        </div>
+                                        <div className="text-right">
+                                            <div className="text-yellow-500 font-black text-xl">
+                                                +${w.amount.toLocaleString()}
+                                            </div>
+                                            <div className="text-[9px] text-white/20 uppercase tracking-tighter">Winner</div>
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+
+                        {isHost ? (
+                            <button
+                                onClick={onNextGame}
+                                className="w-full py-4 bg-yellow-500 hover:bg-yellow-400 text-black font-black rounded-2xl shadow-xl shadow-yellow-500/20 transition-all active:scale-95 text-sm uppercase tracking-widest"
+                            >
+                                下一局 (Next Hand)
+                            </button>
+                        ) : (
+                            <div className="text-center text-white/40 text-xs font-bold italic animate-pulse">
+                                等待房主啟動下一局...
+                            </div>
+                        )}
+                    </div>
+                </div>
+            )}
             {/* Tournament Victory Overlay */}
             {showTournamentVictory && (
                 <div className="fixed inset-0 z-[1000] bg-black/95 backdrop-blur-3xl flex items-center justify-center p-6 animate-in fade-in zoom-in duration-500 overflow-y-auto">
