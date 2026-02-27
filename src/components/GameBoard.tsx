@@ -304,45 +304,40 @@ const GameBoard: React.FC<GameBoardProps> = ({ initialGameState, playerIndex, so
             </button>
 
             {/* Result Overlay (Same Pos as Action Bar) */}
-            {/* 🏆 Result Overlay (Strict 60% Width - Integrated & Compact) */}
+            {/* 🏆 Result Overlay (Strict 60% Width - Atomic Tightly-Packed Layout) */}
             {gameState.isFinished && (
                 <div className="fixed bottom-32 md:bottom-36 left-1/2 -translate-x-1/2 z-[500] flex flex-col items-center w-[60vw] px-4">
-                    <div className="w-full bg-black/95 backdrop-blur-3xl rounded-3xl p-5 border-2 border-yellow-500/50 shadow-[0_30px_80px_rgba(0,0,0,1)] flex flex-col items-center space-y-4">
+                    <div className="w-full bg-black/95 backdrop-blur-3xl rounded-3xl p-5 border-2 border-yellow-500/50 shadow-[0_30px_80px_rgba(0,0,0,1)] flex flex-col items-center">
 
                         {/* Layer 1: Title */}
-                        <div className="text-yellow-500 text-[10px] md:text-xs font-black mb-4 tracking-[0.3em] text-center uppercase border-b border-yellow-500/10 pb-3 w-full">
+                        <div className="text-yellow-500 text-[10px] md:text-xs font-black tracking-[0.3em] text-center uppercase border-b border-yellow-500/10 pb-1.5 w-full mb-1">
                             🎊 Showdown 🎊
                         </div>
 
-                        {/* Layer 2: Integrated Winner & Amount */}
-                        <div className="flex justify-between items-center w-full px-2">
-                            <div className="flex items-center space-x-3">
-                                <div className="w-8 h-8 rounded-full bg-yellow-500/10 border border-yellow-500/20 flex items-center justify-center text-lg shadow-inner">👤</div>
-                                <div className="flex flex-col">
-                                    <span className="text-[9px] text-yellow-500/60 font-black uppercase tracking-tighter">Winner</span>
-                                    <div className="text-white font-black text-sm tracking-tight truncate max-w-[100px] md:max-w-[150px]">
-                                        {gameState.players.find(p => p.id === gameState.winners[0]?.playerId)?.name}
-                                    </div>
-                                </div>
-                            </div>
-                            <div className="text-right">
-                                <div className="text-yellow-400 font-black text-xl md:text-2xl tracking-tighter drop-shadow-[0_0_10px_rgba(234,179,8,0.4)]">
-                                    + {gameState.winners[0]?.amount.toLocaleString()} 💰
-                                </div>
+                        {/* Layer 2: Winner Info (Avatar + Name) */}
+                        <div className="flex flex-col items-center mb-0.5">
+                            <div className="w-8 h-8 rounded-full bg-yellow-500/10 border border-yellow-500/20 flex items-center justify-center text-xl shadow-inner mb-0.5">👤</div>
+                            <div className="text-white font-black text-xs md:text-sm tracking-tight truncate max-w-[150px]">
+                                {gameState.players.find(p => p.id === gameState.winners[0]?.playerId)?.name}
                             </div>
                         </div>
 
-                        {/* Layer 3: Best Hand Cards & Name (Compact Layout) */}
-                        <div className="flex flex-col items-center w-full py-1">
-                            <div className="flex justify-center -space-x-6 mb-2">
+                        {/* Layer 3: Amount */}
+                        <div className="text-yellow-400 font-black text-xl md:text-2xl tracking-tighter drop-shadow-[0_0_10px_rgba(234,179,8,0.4)] mb-2">
+                            + {gameState.winners[0]?.amount.toLocaleString()} 💰
+                        </div>
+
+                        {/* Layer 4: Cards & Hand Name (Tightly Packed) */}
+                        <div className="flex flex-col items-center w-full mb-6">
+                            <div className="flex justify-center -space-x-6 mb-0">
                                 {gameState.winners[0]?.cards?.map((c, i) => (
-                                    <div key={i} className="transform scale-50 md:scale-75 origin-center filter drop-shadow-2xl">
+                                    <div key={i} className="transform scale-50 md:scale-65 origin-center filter drop-shadow-2xl">
                                         <Card card={c} />
                                     </div>
                                 ))}
                             </div>
                             {gameState.winners[0]?.handName && (
-                                <div className="text-emerald-400 text-[10px] md:text-xs font-black">
+                                <div className="text-emerald-400 text-[9px] md:text-[10px] font-black opacity-90 mt-[-4px]">
                                     ( {gameState.winners[0].handName} )
                                 </div>
                             )}
