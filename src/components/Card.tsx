@@ -4,7 +4,8 @@ import React from 'react';
 import { Card as CardType, Suit, Rank } from '../logic/types';
 
 interface CardProps {
-    card: CardType;
+    card?: CardType; // Optional as it might be hidden
+    isHidden?: boolean;
     selected?: boolean;
     onClick?: () => void;
     className?: string;
@@ -34,7 +35,25 @@ const rankLabels: Record<number, string> = {
     [Rank.Two]: '2',
 };
 
-const Card: React.FC<CardProps> = ({ card, selected, onClick, className = '', disabled }) => {
+const Card: React.FC<CardProps> = ({ card, isHidden, selected, onClick, className = '', disabled }) => {
+    if (isHidden || !card) {
+        return (
+            <div
+                className={`
+                    w-14 h-20 md:w-20 md:h-28 shrink-0
+                    rounded-xl border-2 border-white/50
+                    bg-[#1a365d] bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]
+                    shadow-xl flex items-center justify-center
+                    ${className}
+                `}
+            >
+                <div className="w-10 h-14 md:w-14 md:h-20 border border-white/20 rounded-lg flex items-center justify-center">
+                    <span className="text-white/20 text-3xl font-black">?</span>
+                </div>
+            </div>
+        );
+    }
+
     const isRed = card.suit === Suit.Diamond || card.suit === Suit.Heart;
     const colorClass = isRed ? 'text-red-600' : 'text-slate-900';
 
@@ -42,33 +61,33 @@ const Card: React.FC<CardProps> = ({ card, selected, onClick, className = '', di
         <div
             onClick={!disabled ? onClick : undefined}
             className={`
-                relative w-20 h-28 md:w-24 md:h-[136px] shrink-0
+                relative w-14 h-20 md:w-20 md:h-28 shrink-0
                 rounded-xl border-[1px] bg-gradient-to-br from-white to-slate-200
-                flex flex-col p-1.5 md:p-2 cursor-pointer transition-all duration-300 ease-out transform-gpu
+                flex flex-col p-1 md:p-1.5 cursor-pointer transition-all duration-300 ease-out transform-gpu
                 ${selected
-                    ? '-translate-y-4 md:-translate-y-6 border-yellow-300 shadow-[0_0_30px_rgba(250,204,21,0.8),0_15px_30px_rgba(0,0,0,0.5)] ring-2 ring-yellow-400 z-[100]'
-                    : 'border-white/60 shadow-[2px_8px_20px_rgba(0,0,0,0.5),inset_1px_1px_2px_rgba(255,255,255,1)] hover:-translate-y-2'}
-                ${disabled ? 'cursor-default opacity-90 brightness-[0.95]' : ''}
+                    ? '-translate-y-4 border-yellow-300 shadow-[0_0_30px_rgba(250,204,21,0.8)] ring-2 ring-yellow-400 z-[100]'
+                    : 'border-white/60 shadow-lg hover:-translate-y-1'}
+                ${disabled ? 'cursor-default opacity-90 grayscale-[0.2]' : ''}
                 ${className}
             `}
         >
             {/* Top-left rank & suit */}
-            <div className={`text-base md:text-xl font-black ${colorClass} self-start leading-none tracking-tighter`}>
+            <div className={`text-xs md:text-sm font-black ${colorClass} self-start leading-none`}>
                 {rankLabels[card.rank]}
             </div>
-            <div className={`text-lg md:text-2xl ${colorClass} self-start -mt-0.5 md:-mt-1`}>
+            <div className={`text-xs md:text-base ${colorClass} self-start`}>
                 {suitSymbols[card.suit]}
             </div>
 
             {/* Center large suit */}
-            <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[3rem] md:text-[4rem] ${colorClass} drop-shadow-sm opacity-80`}>
+            <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-2xl md:text-4xl ${colorClass} opacity-20`}>
                 {suitSymbols[card.suit]}
             </div>
 
             {/* Bottom-right rank & suit (upside down) */}
-            <div className={`absolute bottom-1.5 md:bottom-2 right-1.5 md:right-2 text-base md:text-xl font-black ${colorClass} flex flex-col items-center leading-none tracking-tighter rotate-180 origin-center`}>
+            <div className={`absolute bottom-1 right-1 text-xs md:text-sm font-black ${colorClass} flex flex-col items-center leading-none rotate-180`}>
                 <span>{rankLabels[card.rank]}</span>
-                <span className="text-lg md:text-2xl -mt-0.5 md:-mt-1">{suitSymbols[card.suit]}</span>
+                <span className="text-xs md:text-base">{suitSymbols[card.suit]}</span>
             </div>
         </div>
     );

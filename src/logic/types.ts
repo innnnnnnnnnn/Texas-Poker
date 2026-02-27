@@ -58,6 +58,8 @@ export interface GameState {
     communityCards: Card[];
     currentPlayerIndex: number;
     dealerIndex: number;
+    smallBlindIndex: number;
+    bigBlindIndex: number;
     pot: number;
     smallBlind: number;
     bigBlind: number;

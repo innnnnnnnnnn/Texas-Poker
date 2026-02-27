@@ -55,151 +55,236 @@ const GameBoard: React.FC<GameBoardProps> = ({ initialGameState, playerIndex, so
         socket.emit("poker_action", { roomId, action, amount });
     };
 
-    const getPlayerAtPosition = (pos: number) => {
-        const idx = (playerIndex + pos) % gameState.players.length;
-        return { ...gameState.players[idx], originalIndex: idx };
+    // Fix: seat positions for 8 players
+    // Seat 0 is always the current player
+    const getSeatPosition = (index: number) => {
+        const relativeIndex = (index - playerIndex + 8) % 8;
+        const positions = [
+            { bottom: '5%', left: '50%', transform: 'translateX(-50%)' },           // Seat 0 (Me)
+            { bottom: '20%', right: '5%', transform: 'none' },                     // Seat 1
+            { top: '50%', right: '2%', transform: 'translateY(-50%)' },            // Seat 2
+            { top: '15%', right: '5%', transform: 'none' },                        // Seat 3
+            { top: '2%', left: '50%', transform: 'translateX(-50%)' },             // Seat 4
+            { top: '15%', left: '5%', transform: 'none' },                         // Seat 5
+            { top: '50%', left: '2%', transform: 'translateY(-50%)' },             // Seat 6
+            { bottom: '20%', left: '5%', transform: 'none' },                      // Seat 7
+        ];
+        return positions[relativeIndex];
     };
 
-    return (
-        <div className="fixed inset-0 w-full h-[100dvh] bg-[#071c10] flex flex-col items-center overflow-hidden touch-none select-none">
-            {/* Immersive Background */}
-            <div className="fixed inset-0 pointer-events-none bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-emerald-900/30 via-[#0a2313] to-[#040e08]" />
+    const toCall = gameState.currentMaxBet - me.currentBet;
+    const minRaise = gameState.currentMaxBet + gameState.bigBlind;
 
-            {/* Top Area: Opponents */}
-            <div className="w-full h-[25vh] bg-black/40 backdrop-blur-xl border-b border-white/10 z-20 flex flex-col items-center relative flex-none">
-                <div className="w-full flex justify-between items-start px-4 pt-2 absolute top-0 left-0 right-0 z-50">
-                    <button onClick={onExit} className="px-4 py-1.5 bg-red-900/30 hover:bg-red-800 text-white rounded-xl text-xs font-black border border-red-400/30 shadow-lg">
-                        🚪 退出
-                    </button>
-                    <div className="bg-yellow-500/10 border border-yellow-500/30 px-3 py-1 rounded-full text-yellow-500 text-xs font-bold">
-                        {gameState.phase}
-                    </div>
+    return (
+        <div className="fixed inset-0 w-full h-[100dvh] bg-[#0b3d1f] flex items-center justify-center overflow-hidden touch-none select-none font-sans">
+            {/* Dark Wood/Felt Overlay */}
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_#1a5d2e_0%,_#0a2e16_70%,_#051a0d_100%)] opacity-100" />
+
+            {/* Table Border (The Ellipse) */}
+            <div className="absolute w-[90%] h-[75%] max-w-5xl rounded-[200px] border-[12px] border-[#3d2b1f] shadow-[0_0_100px_rgba(0,0,0,0.8),inset_0_0_50px_rgba(0,0,0,0.5)] bg-emerald-900/20" />
+
+            {/* Center Area */}
+            <div className="relative z-10 flex flex-col items-center justify-center pointer-events-none">
+                {/* Pot Display */}
+                <div className="mb-6 bg-black/60 backdrop-blur-md px-8 py-3 rounded-full border border-yellow-500/30 flex flex-col items-center">
+                    <span className="text-white/40 text-[10px] uppercase font-bold tracking-tighter">Total Pot</span>
+                    <span className="text-yellow-500 font-black text-2xl md:text-3xl tracking-wide">
+                        💰 {gameState.pot.toLocaleString()}
+                    </span>
                 </div>
 
-                <div className="flex w-full h-full max-w-6xl justify-around items-center px-4 pt-4">
-                    {[1, 2, 3].map((pos) => {
-                        const p = getPlayerAtPosition(pos);
-                        if (!p) return null;
-                        const isCurrent = gameState.currentPlayerIndex === p.originalIndex;
-                        const isDealer = gameState.dealerIndex === p.originalIndex;
-                        return (
-                            <div key={pos} className={`flex flex-col items-center transition-all duration-300 ${isCurrent ? 'scale-110' : 'opacity-60 scale-90'}`}>
-                                <div className="relative mb-1">
-                                    <div className={`w-12 h-12 md:w-16 md:h-16 rounded-full flex items-center justify-center text-xl md:text-3xl border ${isCurrent ? 'bg-yellow-500 border-yellow-200 text-black' : 'bg-white/10 border-white/20 text-white'}`}>
-                                        👤
+                {/* Community Cards */}
+                <div className="flex space-x-2 md:space-x-3 mb-4">
+                    {gameState.communityCards.map((c, i) => (
+                        <Card key={i} card={c} className="scale-90 md:scale-110 shadow-2xl" />
+                    ))}
+                    {Array(5 - gameState.communityCards.length).fill(0).map((_, i) => (
+                        <div key={i} className="w-14 h-20 md:w-20 md:h-28 rounded-xl border-2 border-white/5 bg-black/20 backdrop-blur-sm" />
+                    ))}
+                </div>
+
+                {/* Phase & street info */}
+                <div className="bg-white/5 border border-white/10 px-4 py-1.5 rounded-full text-[10px] md:text-xs text-white/60 font-black uppercase tracking-widest backdrop-blur-sm">
+                    {gameState.phase} • {toCall > 0 ? `To Call: ${toCall}` : 'Check or Bet'}
+                </div>
+            </div>
+
+            {/* Players (Seats) */}
+            {gameState.players.map((p, idx) => {
+                const isCurrent = gameState.currentPlayerIndex === idx && !gameState.isFinished;
+                const isMe = idx === playerIndex;
+                const pos = getSeatPosition(idx);
+
+                return (
+                    <div
+                        key={p.id}
+                        className="absolute transition-all duration-500 z-20"
+                        style={pos}
+                    >
+                        <div className={`relative flex flex-col items-center ${p.isFolded ? 'opacity-40 scale-90 grayscale' : 'scale-100'}`}>
+                            {/* Role Indicator (D, SB, BB) */}
+                            <div className="absolute -top-6 flex space-x-1">
+                                {gameState.dealerIndex === idx && <div className="w-6 h-6 rounded-full bg-white text-black text-[10px] font-black border border-gray-400 flex items-center justify-center shadow-md">D</div>}
+                                {gameState.smallBlindIndex === idx && <div className="w-6 h-6 rounded-full bg-blue-500 text-white text-[10px] font-black border border-blue-200 flex items-center justify-center shadow-md">SB</div>}
+                                {gameState.bigBlindIndex === idx && <div className="w-6 h-6 rounded-full bg-red-500 text-white text-[10px] font-black border border-red-200 flex items-center justify-center shadow-md">BB</div>}
+                            </div>
+
+                            {/* Player Card */}
+                            <div className={`
+                                w-24 md:w-32 bg-[#1a1a1a] rounded-2xl p-2 border-2 transition-all shadow-2xl
+                                ${isCurrent ? 'border-yellow-400 ring-4 ring-yellow-400/20 shadow-yellow-500/20' : 'border-white/10'}
+                            `}>
+                                <div className="flex items-center space-x-2 mb-1">
+                                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-gray-700 to-black border border-white/10 flex items-center justify-center text-xs">👤</div>
+                                    <div className="flex-1 min-w-0">
+                                        <div className="text-white text-[10px] font-bold truncate">{p.name}</div>
+                                        <div className="text-yellow-500 text-[10px] font-black">💰{p.chips.toLocaleString()}</div>
                                     </div>
-                                    {isDealer && (
-                                        <div className="absolute -top-1 -right-1 w-6 h-6 bg-white text-black rounded-full border border-gray-400 flex items-center justify-center font-bold text-[10px]">D</div>
-                                    )}
-                                    {p.isFolded && <div className="absolute inset-0 bg-black/60 rounded-full flex items-center justify-center text-white font-bold text-[10px]">FOLD</div>}
                                 </div>
-                                <div className="text-white font-bold text-[10px] md:text-xs truncate max-w-[80px]">{p.name}</div>
-                                <div className="text-emerald-400 text-[10px] md:text-xs font-bold">💰 {p.chips.toLocaleString()}</div>
-                                {p.lastAction && (
-                                    <div className="px-2 py-0.5 bg-white/10 rounded-md text-[8px] text-white mt-1 uppercase">{p.lastAction}</div>
+                                <div className="h-0.5 bg-white/5 w-full mb-1" />
+                                {p.isFolded ? (
+                                    <div className="text-red-500 text-[9px] font-black text-center uppercase py-0.5">Folded</div>
+                                ) : (
+                                    <div className="text-emerald-400 text-[9px] font-black text-center uppercase py-0.5 min-h-[14px]">
+                                        {p.lastAction || 'Wait'}
+                                    </div>
                                 )}
                             </div>
-                        );
-                    })}
-                </div>
-            </div>
 
-            {/* Middle Area: Community Cards & Pot */}
-            <div className="w-full h-[35vh] flex flex-col items-center justify-center px-4 relative z-10 flex-none">
-                <div className="mb-4 bg-black/60 backdrop-blur-md px-6 py-2 rounded-full border border-yellow-500/30 shadow-[0_0_20px_rgba(234,179,8,0.2)]">
-                    <span className="text-yellow-500 font-bold text-lg md:text-2xl tracking-widest">POT: 💰 {gameState.pot.toLocaleString()}</span>
-                </div>
-
-                <div className="w-full max-w-4xl h-48 bg-white/5 backdrop-blur-[2px] rounded-[40px] border border-white/10 flex items-center justify-center relative shadow-[inset_0_0_40px_rgba(0,0,0,0.6)]">
-                    <div className="flex space-x-2 md:space-x-4">
-                        {gameState.communityCards.map((c, i) => (
-                            <Card key={`${c.rank}-${c.suit}-${i}`} card={c} className="scale-75 md:scale-100" />
-                        ))}
-                        {Array(5 - gameState.communityCards.length).fill(0).map((_, i) => (
-                            <div key={`empty-${i}`} className="w-16 h-24 md:w-20 md:h-28 rounded-xl border border-white/5 bg-black/20" />
-                        ))}
-                    </div>
-                </div>
-
-                {error && (
-                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-red-900 px-6 py-3 rounded-2xl text-white font-bold animate-bounce z-50">
-                        {error}
-                    </div>
-                )}
-            </div>
-
-            {/* Bottom Area: Controls & Hole Cards */}
-            <div className="flex-1 w-full bg-gradient-to-t from-black via-[#041208]/90 to-transparent flex flex-col items-center justify-end pb-8">
-                {/* Betting Controls */}
-                <div className="w-full max-w-6xl px-4 mb-6 flex flex-wrap justify-center gap-2">
-                    {isMyTurn && (
-                        <>
-                            <div className="w-full flex justify-center mb-2 items-center gap-4">
-                                <input
-                                    type="range"
-                                    min={gameState.currentMaxBet + gameState.bigBlind}
-                                    max={me.chips + me.currentBet}
-                                    step={gameState.smallBlind}
-                                    value={raiseAmount}
-                                    onChange={(e) => setRaiseAmount(Number(e.target.value))}
-                                    className="w-48 h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-yellow-500"
-                                />
-                                <span className="text-yellow-500 font-bold">Raise: {raiseAmount}</span>
+                            {/* Cards for this player */}
+                            <div className="flex -space-x-6 mt-1 translate-y-[-4px]">
+                                {p.isFolded ? null : (
+                                    <>
+                                        {isMe ? (
+                                            p.hand.map((c, i) => <Card key={i} card={c} className="scale-50 origin-top shadow-xl" />)
+                                        ) : (
+                                            <>
+                                                <Card isHidden className="scale-50 origin-top shadow-xl" />
+                                                <Card isHidden className="scale-50 origin-top shadow-xl" />
+                                            </>
+                                        )}
+                                    </>
+                                )}
                             </div>
-                            <button onClick={() => handleAction('Fold')} className="px-6 py-3 bg-red-900/80 text-white font-black rounded-xl border border-red-500 shadow-lg active:scale-95 transition-all">FOLD</button>
-                            {me.currentBet >= gameState.currentMaxBet ? (
-                                <button onClick={() => handleAction('Check')} className="px-6 py-3 bg-blue-600 text-white font-black rounded-xl border border-blue-400 shadow-lg active:scale-95 transition-all">CHECK</button>
-                            ) : (
-                                <button onClick={() => handleAction('Call')} className="px-6 py-3 bg-indigo-600 text-white font-black rounded-xl border border-indigo-400 shadow-lg active:scale-95 transition-all">CALL {gameState.currentMaxBet - me.currentBet}</button>
+
+                            {/* Current Bet (Flying area) */}
+                            {p.currentBet > 0 && !p.isFolded && (
+                                <div className="mt-1 bg-black/60 px-3 py-0.5 rounded-full border border-white/10 flex items-center space-x-1 shadow-lg">
+                                    <span className="text-[10px] text-yellow-500 font-bold">BET: {p.currentBet}</span>
+                                </div>
                             )}
-                            <button onClick={() => handleAction('Raise', raiseAmount)} className="px-6 py-3 bg-yellow-500 text-black font-black rounded-xl border border-yellow-200 shadow-lg active:scale-95 transition-all">RAISE</button>
-                            <button onClick={() => handleAction('All-in')} className="px-6 py-3 bg-orange-600 text-white font-black rounded-xl border border-orange-400 shadow-lg active:scale-95 transition-all">ALL-IN</button>
-                        </>
-                    )}
-                </div>
-
-                {/* Hand Display */}
-                <div className="flex items-center gap-4">
-                    <div className="relative">
-                        <div className={`w-14 h-14 md:w-20 md:h-20 rounded-full flex items-center justify-center text-2xl md:text-4xl border border-yellow-200 bg-yellow-500 text-black shadow-xl`}>
-                            👤
-                        </div>
-                        <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 bg-black/80 px-3 py-1 rounded-full border border-emerald-500/50 text-[10px] md:text-sm text-emerald-400 font-bold whitespace-nowrap">
-                            {me.name} (💰{me.chips})
                         </div>
                     </div>
+                );
+            })}
 
-                    <div className="flex -space-x-8 md:-space-x-10 transform translate-y-2">
-                        {me.hand.map((card, i) => (
-                            <Card key={i} card={card} className="rotate-[-5deg] hover:rotate-0 transition-transform origin-bottom" />
-                        ))}
+            {/* Error Message Toast */}
+            {error && (
+                <div className="fixed top-20 left-1/2 -translate-x-1/2 z-[200] bg-red-600 text-white px-6 py-3 rounded-full font-black shadow-2xl border-2 border-white/20 animate-bounce">
+                    ⚠️ {error}
+                </div>
+            )}
+
+            {/* Action Bar (Bottom Right) */}
+            {isMyTurn && (
+                <div className="fixed bottom-6 right-6 z-[100] flex flex-col items-end w-full max-w-md pointer-events-none">
+                    <div className="w-full bg-black/80 backdrop-blur-xl rounded-3xl p-6 border border-white/10 shadow-2xl pointer-events-auto">
+                        <div className="flex justify-between items-center mb-4">
+                            <span className="text-white/60 text-[10px] font-black uppercase tracking-widest">Raise Control</span>
+                            <span className="text-yellow-500 font-black text-lg">💰 {raiseAmount}</span>
+                        </div>
+
+                        {/* Bet Slider */}
+                        <div className="flex items-center space-x-4 mb-6">
+                            <input
+                                type="range"
+                                min={minRaise}
+                                max={me.chips + me.currentBet}
+                                step={gameState.smallBlind}
+                                value={raiseAmount}
+                                onChange={(e) => setRaiseAmount(Number(e.target.value))}
+                                className="flex-1 h-3 bg-white/10 rounded-full appearance-none cursor-pointer accent-yellow-500"
+                            />
+                        </div>
+
+                        {/* Quick Action Buttons */}
+                        <div className="grid grid-cols-4 gap-2 mb-6 text-[9px] font-black">
+                            <button onClick={() => setRaiseAmount(Math.floor(gameState.pot * 0.5))} className="py-2 bg-white/5 rounded-lg border border-white/10 text-white/60 hover:bg-white/10 transition-colors uppercase">1/2 Pot</button>
+                            <button onClick={() => setRaiseAmount(Math.floor(gameState.pot * 0.75))} className="py-2 bg-white/5 rounded-lg border border-white/10 text-white/60 hover:bg-white/10 transition-colors uppercase">3/4 Pot</button>
+                            <button onClick={() => setRaiseAmount(gameState.pot)} className="py-2 bg-white/5 rounded-lg border border-white/10 text-white/60 hover:bg-white/10 transition-colors uppercase">Pot</button>
+                            <button onClick={() => setRaiseAmount(me.chips + me.currentBet)} className="py-2 bg-red-900/40 rounded-lg border border-red-500/50 text-red-400 hover:bg-red-900/60 transition-colors uppercase">All-in</button>
+                        </div>
+
+                        {/* Primary Interaction Buttons */}
+                        <div className="grid grid-cols-3 gap-3">
+                            <button
+                                onClick={() => handleAction('Fold')}
+                                className="py-4 bg-gray-800 hover:bg-gray-700 text-white font-black rounded-2xl transition-all shadow-lg active:scale-95 border border-white/5"
+                            >
+                                FOLD
+                            </button>
+
+                            {toCall <= 0 ? (
+                                <button
+                                    onClick={() => handleAction('Check')}
+                                    className="py-4 bg-blue-600 hover:bg-blue-500 text-white font-black rounded-2xl transition-all shadow-lg active:scale-95 shadow-blue-500/20 border border-blue-400/50"
+                                >
+                                    CHECK
+                                </button>
+                            ) : (
+                                <button
+                                    onClick={() => handleAction('Call')}
+                                    className="py-4 bg-indigo-600 hover:bg-indigo-500 text-white font-black rounded-2xl transition-all shadow-lg active:scale-95 shadow-indigo-500/20 border border-indigo-400/50 flex flex-col items-center justify-center leading-none"
+                                >
+                                    <span>CALL</span>
+                                    <span className="text-[9px] mt-1 opacity-80">{toCall}</span>
+                                </button>
+                            )}
+
+                            <button
+                                onClick={() => handleAction('Raise', raiseAmount)}
+                                className="py-4 bg-yellow-500 hover:bg-yellow-400 text-black font-black rounded-2xl transition-all shadow-lg active:scale-95 shadow-yellow-500/20 border-b-4 border-yellow-700 flex flex-col items-center justify-center leading-none"
+                            >
+                                <span>{toCall <= 0 ? 'BET' : 'RAISE'}</span>
+                                <span className="text-[9px] mt-1 opacity-80">{raiseAmount}</span>
+                            </button>
+                        </div>
                     </div>
                 </div>
-            </div>
+            )}
 
-            {/* Showdown / Result Overlay */}
+            {/* Exit Button - Top Left */}
+            <button
+                onClick={onExit}
+                className="fixed top-6 left-6 z-50 p-3 bg-black/40 backdrop-blur-md rounded-full border border-white/10 hover:bg-red-900/40 text-white/40 hover:text-white transition-all shadow-xl"
+                title="Exit Game"
+            >
+                🚪
+            </button>
+
+            {/* Result Overlay */}
             {gameState.isFinished && (
-                <div className="fixed inset-0 bg-black/90 z-[100] flex flex-col items-center justify-center p-8 backdrop-blur-2xl">
-                    <div className="text-yellow-500 text-4xl md:text-6xl font-black mb-10 animate-bounce">
-                        GAME OVER
+                <div className="fixed inset-0 bg-black/90 z-[500] flex flex-col items-center justify-center p-8 backdrop-blur-2xl">
+                    <div className="text-yellow-500 text-4xl md:text-6xl font-black mb-10 animate-pulse tracking-tighter">
+                        SHOWDOWN
                     </div>
                     <div className="w-full max-w-lg space-y-4">
                         {gameState.winners.map((w, i) => (
-                            <div key={i} className="bg-white/5 p-6 rounded-3xl border border-yellow-500/50 flex justify-between items-center animate-in fade-in slide-in-from-bottom duration-500">
+                            <div key={i} className="bg-gradient-to-r from-yellow-500/20 to-transparent p-6 rounded-3xl border border-yellow-500/50 flex justify-between items-center">
                                 <div>
-                                    <div className="text-white/60 text-sm uppercase font-bold tracking-widest">Winner</div>
+                                    <div className="text-yellow-500 text-[10px] uppercase font-black tracking-widest mb-1">WINNER ✨</div>
                                     <div className="text-2xl font-black text-white">{gameState.players.find(p => p.id === w.playerId)?.name}</div>
-                                    {w.handName && <div className="text-yellow-500 font-bold mt-1">✨ {w.handName}</div>}
+                                    {w.handName && <div className="px-3 py-1 bg-white/5 rounded-lg text-emerald-400 font-bold mt-2 text-xs inline-block">{w.handName}</div>}
                                 </div>
-                                <div className="text-green-400 text-3xl font-black">+ {w.amount.toLocaleString()} 💰</div>
+                                <div className="text-yellow-400 text-3xl font-black">+ {w.amount.toLocaleString()} 💰</div>
                             </div>
                         ))}
                     </div>
                     <div className="mt-12 flex gap-4 w-full max-w-lg">
-                        <button onClick={onNextGame} disabled={!isHost} className={`flex-1 py-5 rounded-2xl font-black text-xl ${isHost ? 'bg-yellow-500 text-black' : 'bg-white/5 text-white/20'}`}>
+                        <button onClick={onNextGame} disabled={!isHost} className={`flex-1 py-5 rounded-3xl font-black text-xl shadow-2xl transition-all ${isHost ? 'bg-yellow-500 text-black active:scale-95' : 'bg-white/5 text-white/20 cursor-not-allowed'}`}>
                             {isHost ? "NEXT ROUND" : "WAITING FOR HOST..."}
                         </button>
-                        <button onClick={onExit} className="flex-1 py-5 bg-white/10 text-white border border-white/20 rounded-2xl font-black text-xl">EXIT</button>
+                        <button onClick={onExit} className="flex-1 py-5 bg-white/5 text-white border border-white/10 rounded-3xl font-black text-xl hover:bg-white/10 transition-all active:scale-95">EXIT</button>
                     </div>
                 </div>
             )}
