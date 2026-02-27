@@ -134,20 +134,26 @@ const GameBoard: React.FC<GameBoardProps> = ({ initialGameState, playerIndex, so
                                 {gameState.bigBlindIndex === idx && <div className="w-6 h-6 rounded-full bg-red-500 text-white text-[10px] font-black border border-red-200 flex items-center justify-center shadow-md">BB</div>}
                             </div>
 
-                            {/* Player Card */}
+                            {/* Player Card (Restructured to 3 Vertical Layers) */}
                             <div className={`
-                                w-24 md:w-32 bg-[#1a1a1a] rounded-2xl p-2 border-2 transition-all shadow-2xl
+                                w-24 md:w-32 bg-black/80 backdrop-blur-md rounded-2xl p-1.5 border-2 transition-all shadow-2xl flex flex-col items-stretch
                                 ${isCurrent ? 'border-yellow-400 ring-4 ring-yellow-400/20 shadow-yellow-500/20' : 'border-white/10'}
                             `}>
-                                <div className="flex items-center space-x-2 mb-1">
-                                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-gray-700 to-black border border-white/10 flex items-center justify-center text-xs">👤</div>
-                                    <div className="flex-1 min-w-0">
-                                        <div className="text-white text-[10px] font-bold truncate">{p.name}</div>
-                                        <div className="text-yellow-500 text-[10px] font-black">💰{p.chips.toLocaleString()}</div>
+                                {/* Layer 1: Name (Top Center) */}
+                                <div className="text-white text-[10px] md:text-xs font-bold truncate text-center mb-1 pb-1 border-b border-white/5">
+                                    {p.name}
+                                </div>
+
+                                {/* Layer 2: Avatar (Left) & Chips (Right) */}
+                                <div className="flex justify-between items-center mb-1 px-0.5">
+                                    <div className="w-5 h-5 md:w-6 md:h-6 rounded-full bg-gradient-to-br from-gray-700 to-black border border-white/10 flex items-center justify-center text-[10px]">👤</div>
+                                    <div className="text-yellow-500 text-[10px] font-black tracking-tighter">
+                                        💰{p.chips.toLocaleString()}
                                     </div>
                                 </div>
-                                <div className="h-0.5 bg-white/5 w-full mb-1" />
-                                <div className={`text-[10px] font-black text-center uppercase py-0.5 min-h-[16px] leading-tight ${p.isFolded ? 'text-red-500' : 'text-emerald-400'}`}>
+
+                                {/* Layer 3: Action Status (Bottom Center) */}
+                                <div className={`text-[10px] font-black text-center uppercase py-0.5 min-h-[16px] leading-tight rounded-lg bg-white/5 ${p.isFolded ? 'text-red-500' : 'text-emerald-400'}`}>
                                     {p.isFolded ? (
                                         'Folded'
                                     ) : (
