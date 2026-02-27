@@ -48,3 +48,5 @@
 Created by Antigravity
 
 - **LIFF ID**: 2009183123-BogBthlR
+
+- **Backend Server**: https://texas-poker-1es0.onrender.com
