@@ -61,13 +61,13 @@ const GameBoard: React.FC<GameBoardProps> = ({ initialGameState, playerIndex, so
         const relativeIndex = (index - playerIndex + 8) % 8;
         const positions = [
             { bottom: '5%', left: '50%', transform: 'translateX(-50%)' },           // Seat 0 (Me)
-            { bottom: '20%', right: '5%', transform: 'none' },                     // Seat 1
-            { top: '50%', right: '2%', transform: 'translateY(-50%)' },            // Seat 2
-            { top: '15%', right: '5%', transform: 'none' },                        // Seat 3
-            { top: '2%', left: '50%', transform: 'translateX(-50%)' },             // Seat 4
-            { top: '15%', left: '5%', transform: 'none' },                         // Seat 5
-            { top: '50%', left: '2%', transform: 'translateY(-50%)' },             // Seat 6
-            { bottom: '20%', left: '5%', transform: 'none' },                      // Seat 7
+            { bottom: '12%', right: '5%', transform: 'none' },                     // Seat 1 (Downstream 1)
+            { bottom: '38%', right: '2%', transform: 'none' },                     // Seat 2 (Downstream 2)
+            { top: '20%', right: '5%', transform: 'none' },                        // Seat 3
+            { top: '5%', left: '50%', transform: 'translateX(-50%)' },             // Seat 4 (Top Center)
+            { top: '20%', left: '5%', transform: 'none' },                         // Seat 5
+            { bottom: '38%', left: '2%', transform: 'none' },                      // Seat 6 (Upstream 2)
+            { bottom: '12%', left: '5%', transform: 'none' },                      // Seat 7 (Upstream 1)
         ];
         return positions[relativeIndex];
     };
@@ -208,9 +208,9 @@ const GameBoard: React.FC<GameBoardProps> = ({ initialGameState, playerIndex, so
                 </div>
             )}
 
-            {/* Action Bar (Centered & Semi-transparent) */}
+            {/* Action Bar (Centered & Highest Layer) */}
             {isMyTurn && (
-                <div className="fixed bottom-32 md:bottom-36 left-1/2 -translate-x-1/2 z-[100] flex flex-col items-center w-full max-w-sm pointer-events-none px-4">
+                <div className="fixed bottom-32 md:bottom-36 left-1/2 -translate-x-1/2 z-[200] flex flex-col items-center w-full max-w-sm pointer-events-none px-4">
                     <div className="w-full bg-black/60 backdrop-blur-3xl rounded-3xl p-5 border border-white/20 shadow-[0_20px_50px_rgba(0,0,0,0.6)] pointer-events-auto">
                         <div className="flex justify-between items-center mb-3">
                             <span className="text-white/40 text-[9px] font-black uppercase tracking-widest">Raise To</span>
