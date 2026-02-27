@@ -85,22 +85,22 @@ const GameBoard: React.FC<GameBoardProps> = ({ initialGameState, playerIndex, so
 
             {/* Center Area (Community Cards & Pot) */}
             <div className="relative z-[140] flex flex-col items-center justify-center pointer-events-none">
-                {/* Pot Display */}
-                <div className="mb-6 bg-black/60 backdrop-blur-md px-8 py-3 rounded-full border border-yellow-500/30 flex flex-col items-center">
-                    <span className="text-white/40 text-[10px] uppercase font-bold tracking-tighter">Total Pot</span>
-                    <span className="text-yellow-500 font-black text-2xl md:text-3xl tracking-wide">
-                        💰 {gameState.pot.toLocaleString()}
-                    </span>
-                </div>
-
                 {/* Community Cards */}
-                <div className="flex space-x-2 md:space-x-3 mb-4">
+                <div className="flex space-x-2 md:space-x-3 mb-6">
                     {gameState.communityCards.map((c, i) => (
                         <Card key={i} card={c} className="scale-90 md:scale-110 shadow-2xl" />
                     ))}
                     {Array(5 - gameState.communityCards.length).fill(0).map((_, i) => (
                         <div key={i} className="w-14 h-20 md:w-20 md:h-28 rounded-xl border-2 border-white/5 bg-black/20 backdrop-blur-sm" />
                     ))}
+                </div>
+
+                {/* Pot Display */}
+                <div className="mb-4 bg-black/60 backdrop-blur-md px-8 py-3 rounded-full border border-yellow-500/30 flex flex-col items-center">
+                    <span className="text-white/40 text-[10px] uppercase font-bold tracking-tighter">Total Pot</span>
+                    <span className="text-yellow-500 font-black text-2xl md:text-3xl tracking-wide">
+                        💰 {gameState.pot.toLocaleString()}
+                    </span>
                 </div>
 
                 {/* Phase & street info */}
