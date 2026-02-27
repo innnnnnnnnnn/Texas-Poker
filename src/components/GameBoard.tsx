@@ -504,85 +504,85 @@ const GameBoard: React.FC<GameBoardProps> = ({ initialGameState, playerIndex, so
             {showTournamentVictory && (
                 <div className="fixed inset-0 z-[1000] bg-black/95 backdrop-blur-3xl flex items-center justify-center p-6 animate-in fade-in zoom-in duration-500 overflow-y-auto">
                     <div className="max-w-md w-full flex flex-col items-center">
-                        {/* 🏆 Trophy - Mega Static & Zero Top Margin */}
-                        <div className="relative">
-                            <div className="absolute inset-0 bg-yellow-500/20 blur-3xl rounded-full scale-150 animate-pulse" />
-                            <div className="text-9xl md:text-[12rem] drop-shadow-[0_0_50px_rgba(234,179,8,0.8)] relative z-10 leading-none">
+                        {/* (A) 🏆 Trophy Area: 15% - 35% height */}
+                        <div className="relative mt-[15vh] flex flex-col items-center justify-center">
+                            <div className="absolute inset-0 bg-yellow-500/20 blur-[10vw] rounded-full scale-150 animate-pulse" />
+                            <div className="text-[25vw] md:text-[20vh] drop-shadow-[0_0_5vw_rgba(234,179,8,0.8)] relative z-10 leading-none">
                                 🏆
                             </div>
                         </div>
 
-                        {/* Winner Name & Message - Refined Typography & Zero Gap */}
-                        <div className="text-center w-full">
-                            <h3 className="text-white font-black text-2xl md:text-4xl tracking-tighter leading-none mb-1">
+                        {/* (B) Winner Name & Message: 35% - 50% height */}
+                        <div className="text-center w-[90vw] mt-[2vh]">
+                            <h3 className="text-white font-black text-[5vw] md:text-[3vh] tracking-tighter leading-none mb-[0.5vh]">
                                 恭喜獲得最後勝利！
                             </h3>
-                            <h2 className="text-yellow-500 font-extrabold text-4xl md:text-6xl tracking-widest leading-none">
+                            <h2 className="text-yellow-500 font-extrabold text-[12vw] md:text-[7vh] tracking-widest leading-none">
                                 {tournamentWinnerName}
                             </h2>
                         </div>
 
-                        {/* Stats Cards - Brick Style (Reduced Padding) */}
-                        <div className="flex flex-col w-full mt-4">
+                        {/* (C) Stats Cards Area: 52% - 75% height */}
+                        <div className="flex flex-col w-[85vw] max-w-[600px] mt-[4vh]">
                             {/* Match Stats */}
-                            <div className="bg-white/10 border-x border-t border-white/20 rounded-t-[32px] p-4 backdrop-blur-md">
-                                <div className="text-sm md:text-base text-white font-black uppercase tracking-widest mb-3 border-b border-white/10 pb-2 text-center">
+                            <div className="bg-white/10 border-x border-t border-white/20 rounded-t-[5vw] md:rounded-t-[3vh] p-[4vw] md:p-[2vh] backdrop-blur-md">
+                                <div className="text-[3vw] md:text-[1.8vh] text-white font-black uppercase tracking-widest mb-[2vh] border-b border-white/10 pb-[1vh] text-center">
                                     本場戰報 (Current Match)
                                 </div>
                                 <div className="flex justify-around items-end">
                                     <div className="text-center">
-                                        <div className="text-white font-black text-2xl leading-none">{sessionStats.wins}</div>
-                                        <div className="text-[9px] text-white/40 uppercase mt-2 font-bold">勝局數</div>
+                                        <div className="text-white font-black text-[6vw] md:text-[3.5vh] leading-none">{sessionStats.wins}</div>
+                                        <div className="text-[2.2vw] md:text-[1.2vh] text-white/40 uppercase mt-[0.5vh] font-bold">勝局數</div>
                                     </div>
-                                    <div className="w-[1px] h-8 bg-white/20" />
+                                    <div className="w-[1px] h-[6vh] bg-white/20" />
                                     <div className="text-center">
-                                        <div className="text-yellow-500 font-black text-2xl leading-none">
+                                        <div className="text-yellow-500 font-black text-[6vw] md:text-[3.5vh] leading-none">
                                             {sessionStats.total > 0 ? Math.round((sessionStats.wins / sessionStats.total) * 100) : 0}%
                                         </div>
-                                        <div className="text-[9px] text-white/40 uppercase mt-2 font-bold">局勝率</div>
+                                        <div className="text-[2.2vw] md:text-[1.2vh] text-white/40 uppercase mt-[0.5vh] font-bold">局勝率</div>
                                     </div>
                                 </div>
                             </div>
 
                             {/* Career Stats */}
-                            <div className="bg-yellow-500/10 border border-white/20 rounded-b-[32px] p-4 backdrop-blur-md">
-                                <div className="text-sm md:text-base text-yellow-500 font-black uppercase tracking-widest mb-3 border-b border-yellow-500/10 pb-2 text-center">
+                            <div className="bg-yellow-500/10 border border-white/20 rounded-b-[5vw] md:rounded-b-[3vh] p-[4vw] md:p-[2vh] backdrop-blur-md">
+                                <div className="text-[3vw] md:text-[1.8vh] text-yellow-500 font-black uppercase tracking-widest mb-[2vh] border-b border-yellow-500/10 pb-[1vh] text-center">
                                     生涯榮譽 (Lifetime Career)
                                 </div>
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div className="space-y-4 text-center">
+                                <div className="grid grid-cols-2 gap-[4vw]">
+                                    <div className="space-y-[1vh] text-center">
                                         <div>
-                                            <div className="text-white font-black text-lg leading-none">{careerStats.matchWins}</div>
-                                            <div className="text-[9px] text-white/40 uppercase mt-1 font-bold">總冠軍數</div>
+                                            <div className="text-white font-black text-[4.5vw] md:text-[2.5vh] leading-none">{careerStats.matchWins}</div>
+                                            <div className="text-[2vw] md:text-[1.1vh] text-white/40 uppercase mt-[0.5vh] font-bold">總冠軍數</div>
                                         </div>
                                         <div>
-                                            <div className="text-yellow-500 font-black text-lg leading-none">
+                                            <div className="text-yellow-500 font-black text-[4.5vw] md:text-[2.5vh] leading-none">
                                                 {careerStats.totalMatches > 0 ? Math.round((careerStats.matchWins / careerStats.totalMatches) * 100) : 0}%
                                             </div>
-                                            <div className="text-[9px] text-white/40 uppercase mt-1 font-bold">比賽勝率</div>
+                                            <div className="text-[2vw] md:text-[1.1vh] text-white/40 uppercase mt-[0.5vh] font-bold">比賽勝率</div>
                                         </div>
                                     </div>
-                                    <div className="space-y-4 text-center">
+                                    <div className="space-y-[1vh] text-center">
                                         <div>
-                                            <div className="text-white font-black text-lg leading-none">{careerStats.handWins + sessionStats.wins}</div>
-                                            <div className="text-[9px] text-white/40 uppercase mt-1 font-bold">總勝局數</div>
+                                            <div className="text-white font-black text-[4.5vw] md:text-[2.5vh] leading-none">{careerStats.handWins + sessionStats.wins}</div>
+                                            <div className="text-[2vw] md:text-[1.1vh] text-white/40 uppercase mt-[0.5vh] font-bold">總勝局數</div>
                                         </div>
                                         <div>
-                                            <div className="text-yellow-500 font-black text-lg leading-none">
+                                            <div className="text-yellow-500 font-black text-[4.5vw] md:text-[2.5vh] leading-none">
                                                 {(careerStats.totalHands + sessionStats.total) > 0 ? Math.round(((careerStats.handWins + sessionStats.wins) / (careerStats.totalHands + sessionStats.total)) * 100) : 0}%
                                             </div>
-                                            <div className="text-[9px] text-white/40 uppercase mt-1 font-bold">總局勝率</div>
+                                            <div className="text-[2vw] md:text-[1.1vh] text-white/40 uppercase mt-[0.5vh] font-bold">總局勝率</div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
-                        {/* Buttons - Horizontal Action Layout - Mega Text */}
-                        <div className="flex flex-row gap-3 w-full mt-6">
+                        {/* (D) Buttons Area: 78% - 92% height */}
+                        <div className="flex flex-row gap-[3vw] w-[85vw] max-w-[600px] mt-[5vh] mb-[8vh]">
                             <button
                                 onClick={() => window.location.href = "/Texas-Poker/lobby/"}
-                                className="flex-1 py-5 bg-white/10 hover:bg-white/20 text-white font-black rounded-[24px] border border-white/20 shadow-xl transition-all active:translate-y-1 uppercase text-sm md:text-lg"
+                                className="flex-1 py-[4vw] md:py-[2vh] bg-white/10 hover:bg-white/20 text-white font-black rounded-[4vw] md:rounded-[2vh] border border-white/20 shadow-xl transition-all active:translate-y-1 uppercase text-[3.5vw] md:text-[1.8vh]"
                             >
                                 回到大廳
                             </button>
@@ -591,7 +591,7 @@ const GameBoard: React.FC<GameBoardProps> = ({ initialGameState, playerIndex, so
                                     const newRoomId = Math.random().toString(36).substring(2, 8).toUpperCase();
                                     window.location.href = `/Texas-Poker/room?id=${newRoomId}`;
                                 }}
-                                className="flex-1 py-5 bg-yellow-500 hover:bg-yellow-400 text-black font-black rounded-[24px] shadow-[0_6px_0_rgb(180,100,0)] transition-all active:translate-y-1 uppercase text-sm md:text-lg"
+                                className="flex-1 py-[4vw] md:py-[2vh] bg-yellow-500 hover:bg-yellow-400 text-black font-black rounded-[4vw] md:rounded-[2vh] shadow-[0_0.8vh_0_rgb(180,100,0)] transition-all active:translate-y-1 uppercase text-[3.5vw] md:text-[1.8vh]"
                             >
                                 再玩一場
                             </button>
