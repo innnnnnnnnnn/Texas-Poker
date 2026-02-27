@@ -14,8 +14,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "神貓大老二 - Shenmao Big Two",
-  description: "A premium web-based Big Two card game.",
+  title: "神貓德州撲克 - Shenmao Texas Poker",
+  description: "A premium web-based Texas Hold'em Poker game.",
 };
 
 export default function RootLayout({
