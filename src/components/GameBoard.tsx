@@ -492,11 +492,11 @@ const GameBoard: React.FC<GameBoardProps> = ({ initialGameState, playerIndex, so
                                         onClick={onNextGame}
                                         className="py-4 bg-yellow-500 hover:bg-yellow-400 text-black font-black rounded-2xl shadow-[0_6px_0_rgb(180,100,0)] transition-all active:translate-y-1 text-xs uppercase tracking-widest"
                                     >
-                                        NEXT HAND
+                                        NEXT
                                     </button>
                                 ) : (
                                     <div className="flex items-center justify-center py-4 bg-black/40 text-yellow-500/30 font-black rounded-2xl border border-yellow-500/10 text-[10px] italic tracking-tighter shadow-inner">
-                                        WAIT HOST...
+                                        WAITING FOR HOST...
                                     </div>
                                 )}
                             </div>
