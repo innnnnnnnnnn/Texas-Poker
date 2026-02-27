@@ -411,7 +411,7 @@ const GameBoard: React.FC<GameBoardProps> = ({ initialGameState, playerIndex, so
             {/* Exit Button - Top Left */}
             <button
                 onClick={onExit}
-                className="fixed z-[500] p-3 bg-black/40 backdrop-blur-md rounded-full border border-white/10 hover:bg-red-900/40 text-white/40 hover:text-white transition-all shadow-xl"
+                className="fixed z-50 p-3 bg-black/40 backdrop-blur-md rounded-full border border-white/10 hover:bg-red-900/40 text-white/40 hover:text-white transition-all shadow-xl"
                 style={{ top: '10px', left: '10px' }}
                 title="Exit Game"
             >
@@ -502,10 +502,9 @@ const GameBoard: React.FC<GameBoardProps> = ({ initialGameState, playerIndex, so
             )}
             {/* Tournament Victory Overlay */}
             {showTournamentVictory && (
-                <div className="fixed inset-0 z-[99999] bg-black flex flex-col items-center justify-start animate-in fade-in duration-300 overflow-y-auto overflow-x-hidden">
-                    {/* Full-coverage Safe Area Shield */}
-                    <div className="fixed inset-0 bg-black z-[-1]" />
-                    <div className="absolute inset-x-0 -top-[100px] h-[100px] bg-black z-[-1]" />
+                <div className="fixed inset-0 z-[99999] bg-black flex flex-col items-center justify-start animate-in fade-in duration-300 overflow-y-auto">
+                    {/* Extra backdrop to ensure notch coverage on some browsers */}
+                    <div className="absolute inset-x-0 -top-20 h-20 bg-black z-[-1]" />
 
                     <div className="w-full flex flex-col items-center">
                         {/* (A) 🏆 Trophy Area: Enlarged & Optimized */}
