@@ -96,14 +96,17 @@ const GameBoard: React.FC<GameBoardProps> = ({ initialGameState, playerIndex, so
 
         socket.on("tournament_winner", (data: { winner: string }) => {
             console.log("[GameBoard] Socket: tournament_winner", data.winner);
-            setTournamentWinnerName(data.winner);
-            setShowTournamentVictory(true);
 
             const currentMeName = gameStateRef.current?.players[playerIndex]?.name;
-            const currentSessionStats = sessionStatsRef.current;
-            const currentCareerStats = careerStatsRef.current;
 
+            // Only show victory screen if I am the winner
             if (data.winner === currentMeName) {
+                setTournamentWinnerName(data.winner);
+                setShowTournamentVictory(true);
+
+                const currentSessionStats = sessionStatsRef.current;
+                const currentCareerStats = careerStatsRef.current;
+
                 // Update career stats
                 const newStats = {
                     ...currentCareerStats,
@@ -122,15 +125,9 @@ const GameBoard: React.FC<GameBoardProps> = ({ initialGameState, playerIndex, so
                     origin: { y: 0.6 }
                 });
             } else {
-                // Just update totals
-                const newStats = {
-                    ...currentCareerStats,
-                    totalMatches: currentCareerStats.totalMatches + 1,
-                    handWins: currentCareerStats.handWins + currentSessionStats.wins,
-                    totalHands: currentCareerStats.totalHands + currentSessionStats.total
-                };
-                setCareerStats(newStats);
-                localStorage.setItem('poker_career_stats', JSON.stringify(newStats));
+                // If I'm not the winner but received this, just redirect or show results
+                // Usually force_leave handled non-winners, but for spectators etc:
+                router.push('/');
             }
         });
 
@@ -577,18 +574,12 @@ const GameBoard: React.FC<GameBoardProps> = ({ initialGameState, playerIndex, so
                         </div>
 
                         {/* Buttons */}
-                        <div className="flex flex-col gap-3 w-full">
+                        <div className="flex flex-col gap-4 w-full">
                             <button
                                 onClick={() => router.push('/')}
-                                className="w-full py-4 bg-yellow-500 hover:bg-yellow-400 text-black font-black rounded-2xl shadow-xl shadow-yellow-500/20 transition-all active:scale-95 uppercase tracking-widest"
+                                className="w-full py-5 bg-yellow-500 hover:bg-yellow-400 text-black font-black rounded-[20px] shadow-[0_6px_0_rgb(180,100,0)] transition-all active:translate-y-1 uppercase tracking-widest text-sm"
                             >
-                                再次挑戰 (Next Match)
-                            </button>
-                            <button
-                                onClick={() => router.push('/')}
-                                className="w-full py-4 bg-white/5 hover:bg-white/10 text-white font-black rounded-2xl border border-white/10 transition-all active:scale-95 uppercase tracking-widest text-xs"
-                            >
-                                回到大廳 (Lobby)
+                                回到大廳 / 再玩一場 (建立新局)
                             </button>
                         </div>
                     </div>

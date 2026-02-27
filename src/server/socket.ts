@@ -210,12 +210,19 @@ io.on("connection", (socket) => {
                 }
             });
 
-            // Tournament Winner Detection (Only after someone is removed)
-            if (room.players.length <= 1) {
-                io.to(data.roomId).emit("tournament_winner", {
-                    winner: room.players[0]?.name || "None",
-                    stats: { matchWins: 1 }
-                });
+            // Tournament Winner Detection (Only if 1 human remains and no AI is needed/left)
+            const humanParticipants = room.players.filter(p => !p.isSpectator && !p.isAI);
+            const aiParticipants = room.players.filter(p => !p.isSpectator && p.isAI);
+
+            if (humanParticipants.length === 1 && aiParticipants.length === 0) {
+                const winner = humanParticipants[0];
+                if (winner.socketId) {
+                    io.to(winner.socketId).emit("tournament_winner", {
+                        winner: winner.name,
+                        stats: { matchWins: 1 }
+                    });
+                }
+                // Notify spectators game is over or just let them stay
                 room.state = null;
                 return;
             }
