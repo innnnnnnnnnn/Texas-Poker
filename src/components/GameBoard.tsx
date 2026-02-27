@@ -323,7 +323,7 @@ const GameBoard: React.FC<GameBoardProps> = ({ initialGameState, playerIndex, so
                         </div>
 
                         {/* Layer 3: Amount */}
-                        <div className="text-yellow-400 font-black text-xl md:text-2xl tracking-tighter drop-shadow-[0_0_10px_rgba(234,179,8,0.4)] mb-0">
+                        <div className="text-yellow-400 font-black text-xl md:text-2xl tracking-tighter drop-shadow-[0_0_10px_rgba(234,179,8,0.4)] mb-3">
                             + {gameState.winners[0]?.amount.toLocaleString()} 💰
                         </div>
 
@@ -337,7 +337,7 @@ const GameBoard: React.FC<GameBoardProps> = ({ initialGameState, playerIndex, so
                                 ))}
                             </div>
                             {gameState.winners[0]?.handName && (
-                                <div className="text-emerald-400 text-[9px] md:text-[10px] font-black opacity-90 mt-[-20px] md:mt-[-28px] leading-none">
+                                <div className="text-emerald-400 text-[9px] md:text-[10px] font-black opacity-90 mt-[-28px] leading-none">
                                     ( {gameState.winners[0].handName} )
                                 </div>
                             )}
