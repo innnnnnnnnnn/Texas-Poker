@@ -502,8 +502,8 @@ const GameBoard: React.FC<GameBoardProps> = ({ initialGameState, playerIndex, so
             )}
             {/* Tournament Victory Overlay */}
             {showTournamentVictory && (
-                <div className="fixed inset-0 z-[1000] bg-black/95 backdrop-blur-3xl flex items-center justify-center p-6 animate-in fade-in zoom-in duration-500 overflow-y-auto">
-                    <div className="max-w-md w-full flex flex-col items-center">
+                <div className="fixed inset-0 z-[1000] bg-black flex flex-col items-center justify-start animate-in fade-in duration-300 overflow-y-auto">
+                    <div className="w-full flex flex-col items-center">
                         {/* (A) 🏆 Trophy Area: 15% - 35% height */}
                         <div className="relative mt-[15vh] flex flex-col items-center justify-center">
                             <div className="absolute inset-0 bg-yellow-500/20 blur-[10vw] rounded-full scale-150 animate-pulse" />
