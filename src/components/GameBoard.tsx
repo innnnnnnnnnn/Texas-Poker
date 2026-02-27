@@ -304,9 +304,9 @@ const GameBoard: React.FC<GameBoardProps> = ({ initialGameState, playerIndex, so
             </button>
 
             {/* Result Overlay (Same Pos as Action Bar) */}
-            {/* 🏆 Result Overlay (Strict 30% Width 5-Layer Vertical Layout) */}
+            {/* 🏆 Result Overlay (Strict 50% Width 5-Layer Vertical Layout) */}
             {gameState.isFinished && (
-                <div className="fixed bottom-32 md:bottom-36 left-1/2 -translate-x-1/2 z-[500] flex flex-col items-center w-[30vw] px-4">
+                <div className="fixed bottom-32 md:bottom-36 left-1/2 -translate-x-1/2 z-[500] flex flex-col items-center w-[50vw] px-4">
                     <div className="w-full bg-black/90 backdrop-blur-3xl rounded-3xl p-5 border-2 border-yellow-500/50 shadow-[0_30px_70px_rgba(0,0,0,0.9)] flex flex-col items-center">
 
                         {/* Layer 1: Title */}
