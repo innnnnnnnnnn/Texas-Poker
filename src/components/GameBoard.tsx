@@ -422,80 +422,87 @@ const GameBoard: React.FC<GameBoardProps> = ({ initialGameState, playerIndex, so
                 🚪
             </button>
 
-            {/* 🏆 原子化極致緊湊結算控制區 (Atomic Hand Result Overlay) */}
+            {/* 🏆 原子化技術緊湊結算控制區 - 影視化 & 動作條對齊版 */}
             {gameState.isFinished && !showTournamentVictory && (
-                <div className="fixed inset-0 z-[500] bg-black/40 backdrop-blur-sm flex items-center justify-center p-4">
-                    <div className="w-full max-w-sm md:max-w-md bg-black/90 backdrop-blur-3xl rounded-[32px] p-8 border border-yellow-500/30 shadow-[0_0_80px_rgba(234,179,8,0.2)] animate-in fade-in zoom-in duration-300 flex flex-col items-center text-center">
+                <>
+                    {/* 全桌模糊背景 (Blurred Table Backdrop) */}
+                    <div className="fixed inset-0 z-[190] bg-black/20 backdrop-blur-md animate-in fade-in duration-500" />
 
-                        {/* 獲勝宣告組 (Winning Announcement Group) */}
-                        <div className="mb-0.5 text-[10px] text-yellow-500/40 font-black uppercase tracking-[0.2em] animate-pulse">
-                            🎊 Showdown 🎊
-                        </div>
+                    {/* 結算控制卡片 - 位置與下注條完全同步 (Positioned like Action Bar) */}
+                    <div className="fixed bottom-32 md:bottom-36 left-1/2 -translate-x-1/2 z-[200] flex flex-col items-center w-[90%] md:w-[60%] pointer-events-none px-4">
+                        <div className="w-full bg-black/60 backdrop-blur-3xl rounded-[32px] p-6 md:p-8 border border-white/20 shadow-[0_20px_80px_rgba(0,0,0,0.6)] pointer-events-auto flex flex-col items-center text-center animate-in fade-in zoom-in duration-300">
 
-                        <div className="flex items-center space-x-2 mb-0.5">
-                            <div className="w-6 h-6 rounded-full bg-yellow-500 flex items-center justify-center text-xs shadow-lg">
-                                {gameState.winners[0]?.playerId && gameState.players.find(p => p.id === gameState.winners[0].playerId)?.isHuman ? '👤' : '🤖'}
-                            </div>
-                            <h2 className="text-white text-xl font-black tracking-tight">
-                                {gameState.winners[0]
-                                    ? (gameState.players.find(p => p.id === gameState.winners[0].playerId)?.name || "贏家")
-                                    : "無人獲勝"}
-                            </h2>
-                        </div>
-
-                        <div className="text-yellow-500 font-black text-3xl mb-3 drop-shadow-[0_2px_10px_rgba(234,179,8,0.4)]">
-                            + {gameState.winners[0]?.amount.toLocaleString() || 0} 💰
-                        </div>
-
-                        {/* 對局詳情組 (Hand Details Group) */}
-                        <div className="flex flex-col items-center w-full">
-                            {/* 決戰五張牌 (Winning Cards) */}
-                            <div className="flex -space-x-4 md:-space-x-6 origin-top scale-[0.65] md:scale-75 mb-0">
-                                {gameState.winners[0]?.cards ? (
-                                    gameState.winners[0].cards.map((c, i) => (
-                                        <Card key={i} card={c} className="shadow-2xl ring-2 ring-white/10" />
-                                    ))
-                                ) : (
-                                    gameState.communityCards.map((c, i) => (
-                                        <Card key={i} card={c} className="shadow-2xl ring-2 ring-white/10 opacity-50" />
-                                    ))
-                                )}
+                            {/* 獲勝宣告組 (Winning Announcement Group) */}
+                            <div className="mb-0 text-[10px] text-yellow-500/40 font-black uppercase tracking-[0.2em] animate-pulse">
+                                🎊 Showdown 🎊
                             </div>
 
-                            {/* 牌型名稱 (Hand Name) - 精密緊貼 mt-[-28px] */}
-                            <div className="mt-[-28px] md:mt-[-35px] text-yellow-500/80 font-black text-sm uppercase tracking-widest leading-none bg-black/80 px-4 py-1.5 rounded-full border border-yellow-500/20 backdrop-blur-md z-10">
-                                ( {gameState.winners[0]?.handName || "高牌"} )
+                            <div className="flex items-center space-x-2 mb-0">
+                                <div className="w-6 h-6 rounded-full bg-yellow-500 flex items-center justify-center text-xs shadow-lg">
+                                    {gameState.winners[0]?.playerId && gameState.players.find(p => p.id === gameState.winners[0].playerId)?.isHuman ? '👤' : '🤖'}
+                                </div>
+                                <h2 className="text-white text-xl md:text-2xl font-black tracking-tight">
+                                    {gameState.winners[0]
+                                        ? (gameState.players.find(p => p.id === gameState.winners[0].playerId)?.name || "贏家")
+                                        : "無人獲勝"}
+                                </h2>
                             </div>
-                        </div>
 
-                        {/* 分割空間 */}
-                        <div className="h-6" />
+                            <div className="text-yellow-500 font-black text-3xl md:text-4xl mb-3 drop-shadow-[0_2px_15px_rgba(234,179,8,0.5)]">
+                                + {gameState.winners[0]?.amount.toLocaleString() || 0} 💰
+                            </div>
 
-                        {/* 動作按鈕組 (Action Buttons) */}
-                        <div className="flex flex-col gap-3 w-full">
-                            <div className="grid grid-cols-2 gap-3 w-full">
+                            {/* 穩定呼吸空間 12px */}
+                            <div className="h-3" />
+
+                            {/* 對局詳情組 (Hand Details Group) */}
+                            <div className="flex flex-col items-center w-full">
+                                {/* 決戰五張牌 (Winning Cards) */}
+                                <div className="flex -space-x-4 md:-space-x-6 origin-top scale-[0.7] md:scale-95 mb-0">
+                                    {gameState.winners[0]?.cards ? (
+                                        gameState.winners[0].cards.map((c, i) => (
+                                            <Card key={i} card={c} className="shadow-2xl ring-2 ring-white/10" />
+                                        ))
+                                    ) : (
+                                        gameState.communityCards.map((c, i) => (
+                                            <Card key={i} card={c} className="shadow-2xl ring-2 ring-white/10 opacity-50" />
+                                        ))
+                                    )}
+                                </div>
+
+                                {/* 牌型名稱 (Hand Name) - 極限緊貼 mt-[-28px] */}
+                                <div className="mt-[-28px] md:mt-[-40px] text-yellow-500/90 font-black text-sm md:text-base uppercase tracking-[0.3em] leading-none bg-black/60 px-6 py-2 rounded-full border border-yellow-500/20 backdrop-blur-xl z-20 shadow-xl">
+                                    ( {gameState.winners[0]?.handName || "高牌"} )
+                                </div>
+                            </div>
+
+                            {/* 分割空間 */}
+                            <div className="h-8" />
+
+                            {/* 動作按鈕組 (Action Buttons) */}
+                            <div className="grid grid-cols-2 gap-4 w-full md:max-w-md">
                                 <button
                                     onClick={onExit}
-                                    className="py-4 bg-white/5 hover:bg-white/10 text-white/60 hover:text-white font-black rounded-2xl border border-white/5 transition-all active:scale-95 text-xs uppercase tracking-widest"
+                                    className="py-4 bg-white/5 hover:bg-white/10 text-white/50 hover:text-white font-black rounded-2xl border border-white/5 transition-all active:scale-95 text-xs uppercase tracking-widest shadow-lg"
                                 >
                                     EXIT
                                 </button>
                                 {isHost ? (
                                     <button
                                         onClick={onNextGame}
-                                        className="py-4 bg-yellow-500 hover:bg-yellow-400 text-black font-black rounded-2xl shadow-xl shadow-yellow-500/20 transition-all active:scale-95 text-xs uppercase tracking-widest border-b-4 border-yellow-700"
+                                        className="py-4 bg-yellow-500 hover:bg-yellow-400 text-black font-black rounded-2xl shadow-[0_6px_0_rgb(180,100,0)] transition-all active:translate-y-1 text-xs uppercase tracking-widest"
                                     >
-                                        NEXT
+                                        NEXT HAND
                                     </button>
                                 ) : (
-                                    <div className="flex items-center justify-center py-4 bg-black/40 text-yellow-500/40 font-black rounded-2xl border border-yellow-500/10 text-[10px] italic">
+                                    <div className="flex items-center justify-center py-4 bg-black/40 text-yellow-500/30 font-black rounded-2xl border border-yellow-500/10 text-[10px] italic tracking-tighter shadow-inner">
                                         WAIT HOST...
                                     </div>
                                 )}
                             </div>
                         </div>
                     </div>
-                </div>
+                </>
             )}
             {/* Tournament Victory Overlay */}
             {showTournamentVictory && (
