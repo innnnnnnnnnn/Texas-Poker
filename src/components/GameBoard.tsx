@@ -83,8 +83,8 @@ const GameBoard: React.FC<GameBoardProps> = ({ initialGameState, playerIndex, so
             {/* Table Border (The Ellipse) */}
             <div className="absolute w-[90%] h-[75%] max-w-5xl rounded-[200px] border-[12px] border-[#3d2b1f] shadow-[0_0_100px_rgba(0,0,0,0.8),inset_0_0_50px_rgba(0,0,0,0.5)] bg-emerald-900/20" />
 
-            {/* Center Area */}
-            <div className="relative z-10 flex flex-col items-center justify-center pointer-events-none">
+            {/* Center Area (Community Cards & Pot) */}
+            <div className="relative z-[140] flex flex-col items-center justify-center pointer-events-none">
                 {/* Pot Display */}
                 <div className="mb-6 bg-black/60 backdrop-blur-md px-8 py-3 rounded-full border border-yellow-500/30 flex flex-col items-center">
                     <span className="text-white/40 text-[10px] uppercase font-bold tracking-tighter">Total Pot</span>
