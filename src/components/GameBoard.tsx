@@ -85,16 +85,6 @@ const GameBoard: React.FC<GameBoardProps> = ({ initialGameState, playerIndex, so
 
             {/* Center Area (Community Cards & Pot) */}
             <div className="relative z-[140] flex flex-col items-center justify-center pointer-events-none">
-                {/* Community Cards */}
-                <div className="flex space-x-2 md:space-x-3 mb-6">
-                    {gameState.communityCards.map((c, i) => (
-                        <Card key={i} card={c} className="scale-90 md:scale-110 shadow-2xl" />
-                    ))}
-                    {Array(5 - gameState.communityCards.length).fill(0).map((_, i) => (
-                        <div key={i} className="w-14 h-20 md:w-20 md:h-28 rounded-xl border-2 border-white/5 bg-black/20 backdrop-blur-sm" />
-                    ))}
-                </div>
-
                 {/* Pot Display */}
                 <div className="mb-4 bg-black/60 backdrop-blur-md px-8 py-3 rounded-full border border-yellow-500/30 flex flex-col items-center">
                     <span className="text-white/40 text-[10px] uppercase font-bold tracking-tighter">Total Pot</span>
@@ -103,9 +93,19 @@ const GameBoard: React.FC<GameBoardProps> = ({ initialGameState, playerIndex, so
                     </span>
                 </div>
 
-                {/* Phase & street info */}
-                <div className="bg-white/5 border border-white/10 px-4 py-1.5 rounded-full text-[10px] md:text-xs text-white/60 font-black uppercase tracking-widest backdrop-blur-sm">
+                {/* Phase & street info (Street Info) */}
+                <div className="mb-6 bg-white/5 border border-white/10 px-4 py-1.5 rounded-full text-[10px] md:text-xs text-white/60 font-black uppercase tracking-widest backdrop-blur-sm">
                     {gameState.phase} • {toCall > 0 ? `To Call: ${toCall}` : 'Check or Bet'}
+                </div>
+
+                {/* Community Cards */}
+                <div className="flex space-x-2 md:space-x-3">
+                    {gameState.communityCards.map((c, i) => (
+                        <Card key={i} card={c} className="scale-90 md:scale-110 shadow-2xl" />
+                    ))}
+                    {Array(5 - gameState.communityCards.length).fill(0).map((_, i) => (
+                        <div key={i} className="w-14 h-20 md:w-20 md:h-28 rounded-xl border-2 border-white/5 bg-black/20 backdrop-blur-sm" />
+                    ))}
                 </div>
             </div>
 
