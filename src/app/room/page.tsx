@@ -15,7 +15,7 @@ const RoomContent = () => {
     const roomId = searchParams.get("id");
     const router = useRouter();
 
-    const [players, setPlayers] = useState<{ id?: string, name: string, isHost: boolean, ready: boolean }[]>([]);
+    const [players, setPlayers] = useState<{ id?: string, name: string, isHost: boolean, ready: boolean, isSpectator?: boolean, isAI?: boolean }[]>([]);
     const [gameState, setGameState] = useState<GameState | null>(null);
     const [playerIndex, setPlayerIndex] = useState<number>(-1);
     const [difficulty, setDifficulty] = useState<'Easy' | 'Medium' | 'Hard' | 'Expert' | 'Master'>('Medium');
@@ -30,6 +30,11 @@ const RoomContent = () => {
         return (pId && pId === myId) || (pName && pName === myName);
     });
     const currentIsHost = meMatched?.isHost || false;
+
+    // Filter out internal AIs for the lobby display (since AI is added only at start)
+    const lobbyPlayers = players.filter(p => !p.isAI);
+    const spectatorCount = lobbyPlayers.filter(p => p.isSpectator).length;
+    const activePlayerCount = lobbyPlayers.filter(p => !p.isSpectator).length;
 
     useEffect(() => {
         console.log("[Room] Auth Debug:", { myId, myName, playersCount: players.length, amIHost: currentIsHost });
@@ -164,7 +169,7 @@ const RoomContent = () => {
                     <div>
                         <h2 className="text-xl md:text-2xl font-bold text-white">建立新局</h2>
                         <p className="text-white/40 text-center text-sm md:text-base">建立一個德州撲克牌局，邀請好友或與 AI 對戰。</p>
-                        <p className="text-yellow-500 text-sm font-bold">房號: {roomId} (等待玩家加入中... {players.length}/8)</p>
+                        <p className="text-yellow-500 text-sm font-bold">房號: {roomId} (等待中 👥 {activePlayerCount}/8 👁️ {spectatorCount})</p>
                     </div>
                     <div className="flex flex-col md:flex-row gap-2 w-full md:w-auto">
                         <button
@@ -190,21 +195,26 @@ const RoomContent = () => {
 
                 <div className="space-y-2 md:space-y-4 mb-6 overflow-y-auto flex-1 pr-2 scrollbar-hide">
                     {[0, 1, 2, 3, 4, 5, 6, 7].map((i) => {
-                        const p = players[i];
+                        const p = lobbyPlayers[i];
                         return (
                             <div key={i} className={`flex items-center justify-between p-2 md:p-3 rounded-xl border ${p ? 'bg-black/40 border-white/20' : 'bg-black/10 border-white/5 border-dashed opacity-50'}`}>
                                 <div className="flex items-center space-x-3">
-                                    <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm ${p ? 'bg-yellow-500' : 'bg-white/5'}`}>
-                                        {p ? '👤' : ''}
+                                    <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm ${p ? (p.isSpectator ? 'bg-blue-500/50' : 'bg-yellow-500') : 'bg-white/5'}`}>
+                                        {p ? (p.isSpectator ? '👁️' : '👤') : ''}
                                     </div>
                                     <div>
                                         <div className={`font-bold text-xs md:text-sm ${p ? 'text-white' : 'text-white/20'}`}>
                                             {p ? p.name : '等待加入...'}
+                                            {p?.isSpectator && <span className="ml-2 text-[10px] text-blue-400 font-normal">(觀賽中)</span>}
                                         </div>
                                         {p?.isHost && <span className="text-[8px] bg-yellow-600 text-white px-2 py-0.5 rounded-full uppercase font-black">房主</span>}
                                     </div>
                                 </div>
-                                {p && <div className="text-green-500 font-bold text-[10px]">已就緒</div>}
+                                {p && (
+                                    <div className={`font-bold text-[10px] ${p.isSpectator ? 'text-blue-400' : 'text-green-500'}`}>
+                                        {p.isSpectator ? '上帝視角' : '已就緒'}
+                                    </div>
+                                )}
                             </div>
                         );
                     })}

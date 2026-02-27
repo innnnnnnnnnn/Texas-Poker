@@ -18,7 +18,7 @@ const io = new Server(httpServer, {
 
 interface Room {
     id: string;
-    players: { id: string, name: string, socketId: string, isHost: boolean, isAI?: boolean }[];
+    players: { id: string, name: string, socketId: string, isHost: boolean, isAI?: boolean, isSpectator?: boolean }[];
     state: GameState | null;
     difficulty: 'Easy' | 'Medium' | 'Hard' | 'Expert' | 'Master';
     maxPlayers: number;
@@ -87,6 +87,7 @@ io.on("connection", (socket) => {
         }
         const room = rooms[roomId];
         const existingPlayerIndex = room.players.findIndex(p => p.id === userId);
+        const gameInProgress = room.state && !room.state.isFinished;
 
         if (existingPlayerIndex !== -1) {
             const oldSocketId = room.players[existingPlayerIndex].socketId;
@@ -100,7 +101,9 @@ io.on("connection", (socket) => {
                 return;
             }
             const isHost = room.players.length === 0;
-            room.players.push({ id: userId, name, socketId: socket.id, isHost });
+            // Key Logic: If joining while game is in progress, you are a permanent spectator for this session
+            const isSpectator = !!gameInProgress;
+            room.players.push({ id: userId, name, socketId: socket.id, isHost, isSpectator });
             playerRoomMap[socket.id] = roomId;
         }
 
@@ -116,7 +119,14 @@ io.on("connection", (socket) => {
         });
 
         io.to(roomId).emit("room_update", {
-            players: room.players.map(p => ({ id: p.id, name: p.name, isHost: p.isHost, ready: true, isAI: p.isAI })),
+            players: room.players.map(p => ({
+                id: p.id,
+                name: p.name,
+                isHost: p.isHost,
+                ready: true,
+                isAI: p.isAI,
+                isSpectator: p.isSpectator
+            })),
             count: room.players.length,
             difficulty: room.difficulty,
             maxPlayers: room.maxPlayers
@@ -159,24 +169,29 @@ io.on("connection", (socket) => {
 
         console.log(`[Socket] Starting game for room ${data.roomId}. Players: ${room.players.length}`);
 
-        // 1. Fill with AI up to maxPlayers (This should always happen before starting)
-        const currentNonAI = room.players.filter(p => !p.isAI).length;
-        const targetAI = Math.max(0, room.maxPlayers - currentNonAI);
+        // 1. Filter spectators and existing AI
+        const spectators = room.players.filter(p => !!p.isSpectator);
+        const originalParticipants = room.players.filter(p => !p.isSpectator && !p.isAI);
+
+        // 2. Fill with AI up to maxPlayers
+        const targetAI = Math.max(0, room.maxPlayers - originalParticipants.length);
 
         // Always ensure we have at least 2 players total including AI
-        const finalTargetAI = (room.players.length < 2 && targetAI === 0) ? 1 : targetAI;
+        const finalTargetAI = (originalParticipants.length < 2 && targetAI === 0) ? 1 : targetAI;
 
         // Clean existing AI to re-populate correctly based on new maxPlayers or room state
-        room.players = room.players.filter(p => !p.isAI);
+        room.players = [...originalParticipants];
         for (let i = 0; i < finalTargetAI; i++) {
             room.players.push({
                 id: `ai_${room.players.length}`,
                 name: `神貓 AI-${room.players.length + 1}`,
                 socketId: "",
                 isHost: false,
-                isAI: true
+                isAI: true,
+                isSpectator: false
             });
         }
+        room.players.push(...spectators);
 
         // 2. Chip Inheritance & Bankruptcy removal (Only if game was already running)
         let previousPlayers = room.state?.players || [];
@@ -206,7 +221,10 @@ io.on("connection", (socket) => {
             }
         }
 
-        const playerInfos = room.players.map((p) => {
+        // 3. Define the active participants for the game logic
+        const activeParticipants = room.players.filter(p => !p.isSpectator);
+
+        const playerInfos = activeParticipants.map((p) => {
             const prev = previousPlayers.find(prevP => prevP.name === p.name);
             return {
                 name: p.name,
@@ -217,22 +235,25 @@ io.on("connection", (socket) => {
 
         room.state = initializeGame(playerInfos);
 
-        room.players.forEach((p, index) => {
-            if (p.socketId) {
-                const playerIdx = index;
-                const maskedState = {
-                    ...room.state,
-                    players: room.state?.players.map((sp, idx) => ({
-                        ...sp,
-                        hand: idx === playerIdx ? sp.hand : []
-                    }))
-                };
+        // 4. Distribute game_start to everyone in the room
+        room.players.forEach((p) => {
+            if (!p.socketId) return;
 
-                io.to(p.socketId).emit("game_start", {
-                    state: maskedState,
-                    playerIndex: index
-                });
-            }
+            // Determine if this person is a player or spectator in the actual game state
+            const playerIndexInGame = room.state!.players.findIndex(stateP => stateP.name === p.name);
+
+            const maskedState = (playerIndexInGame === -1) ? room.state! : {
+                ...room.state!,
+                players: room.state!.players.map((sp, idx) => ({
+                    ...sp,
+                    hand: (idx === playerIndexInGame) ? sp.hand : []
+                }))
+            };
+
+            io.to(p.socketId).emit("game_start", {
+                state: maskedState,
+                playerIndex: playerIndexInGame
+            });
         });
 
         if (room.state && !room.state.players[room.state.currentPlayerIndex].isHuman) {
