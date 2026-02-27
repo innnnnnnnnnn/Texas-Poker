@@ -169,7 +169,7 @@ const RoomContent = () => {
     }
 
     return (
-        <div className="h-screen bg-[#0a4d2e] flex flex-col items-center justify-center py-4 px-4 md:p-8 overflow-hidden">
+        <div className="h-screen bg-black flex flex-col items-center justify-center py-4 px-4 md:p-8 overflow-hidden">
             <div className="w-full max-w-2xl bg-black/30 rounded-3xl p-6 md:p-10 border border-white/10 shadow-2xl backdrop-blur-xl flex flex-col max-h-full">
                 <div className="flex flex-col md:flex-row justify-between items-start mb-6 gap-4 flex-none">
                     <div>

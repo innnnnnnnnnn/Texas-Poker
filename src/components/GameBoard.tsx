@@ -180,9 +180,9 @@ const GameBoard: React.FC<GameBoardProps> = ({ initialGameState, playerIndex, so
     const minRaise = gameState.currentMaxBet + gameState.bigBlind;
 
     return (
-        <div className="fixed inset-0 w-full h-[100dvh] bg-[#0b3d1f] flex items-center justify-center overflow-hidden touch-none select-none font-sans">
-            {/* Dark Wood/Felt Overlay */}
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_#1a5d2e_0%,_#0a2e16_70%,_#051a0d_100%)] opacity-100" />
+        <div className="fixed inset-0 w-full h-[100dvh] bg-black flex items-center justify-center overflow-hidden touch-none select-none font-sans">
+            {/* Table Area with Safe Area Protection */}
+            <div className="absolute inset-0 top-[env(safe-area-inset-top,0px)] bottom-[env(safe-area-inset-bottom,0px)] bg-[radial-gradient(circle_at_center,_#1a5d2e_0%,_#0a2e16_70%,_#051a0d_100%)] opacity-100" />
 
             {/* Table Border (The Ellipse) */}
             <div className="absolute w-[90%] h-[75%] max-w-5xl rounded-[200px] border-[12px] border-[#3d2b1f] shadow-[0_0_100px_rgba(0,0,0,0.8),inset_0_0_50px_rgba(0,0,0,0.5)] bg-emerald-900/20" />
@@ -408,15 +408,17 @@ const GameBoard: React.FC<GameBoardProps> = ({ initialGameState, playerIndex, so
                 </div>
             )}
 
-            {/* Exit Button - Top Left */}
-            <button
-                onClick={onExit}
-                className="fixed z-[100000] p-3 bg-black/40 backdrop-blur-md rounded-full border border-white/10 hover:bg-red-900/40 text-white/40 hover:text-white transition-all shadow-xl"
-                style={{ top: '10px', left: '10px' }}
-                title="Exit Game"
-            >
-                🚪
-            </button>
+            {/* Exit Button - Top Left (Hidden on Victory Screen) */}
+            {!showTournamentVictory && (
+                <button
+                    onClick={onExit}
+                    className="fixed z-[100000] p-3 bg-black/40 backdrop-blur-md rounded-full border border-white/10 hover:bg-red-900/40 text-white/40 hover:text-white transition-all shadow-xl"
+                    style={{ top: 'calc(env(safe-area-inset-top, 0px) + 10px)', left: '10px' }}
+                    title="Exit Game"
+                >
+                    🚪
+                </button>
+            )}
 
             {/* 🏆 原子化技術緊湊結算控制區 - 影視化 & 動作條對齊版 */}
             {gameState.isFinished && !showTournamentVictory && (
@@ -502,9 +504,10 @@ const GameBoard: React.FC<GameBoardProps> = ({ initialGameState, playerIndex, so
             )}
             {/* Tournament Victory Overlay */}
             {showTournamentVictory && (
-                <div className="fixed inset-0 z-[99999] bg-black flex flex-col items-center justify-start animate-in fade-in duration-300 overflow-y-auto">
-                    {/* Extra backdrop to ensure notch coverage on some browsers */}
-                    <div className="absolute inset-x-0 -top-20 h-20 bg-black z-[-1]" />
+                <div className="fixed inset-0 z-[99999] bg-black flex flex-col items-center justify-start animate-in fade-in duration-300 overflow-y-auto overflow-x-hidden">
+                    {/* Full-coverage Safe Area Shield */}
+                    <div className="fixed inset-0 bg-black z-[-1]" />
+                    <div className="absolute inset-x-0 -top-[100px] h-[100px] bg-black z-[-1]" />
 
                     <div className="w-full flex flex-col items-center">
                         {/* (A) 🏆 Trophy Area: Enlarged & Optimized */}
