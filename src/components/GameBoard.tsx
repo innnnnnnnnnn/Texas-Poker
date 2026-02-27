@@ -83,25 +83,30 @@ const GameBoard: React.FC<GameBoardProps> = ({ initialGameState, playerIndex, so
             {/* Table Border (The Ellipse) */}
             <div className="absolute w-[90%] h-[75%] max-w-5xl rounded-[200px] border-[12px] border-[#3d2b1f] shadow-[0_0_100px_rgba(0,0,0,0.8),inset_0_0_50px_rgba(0,0,0,0.5)] bg-emerald-900/20" />
 
-            {/* Center Area (Community Cards & Pot) */}
-            <div className="relative z-[140] flex flex-col items-center justify-center pointer-events-none">
-                {/* Pot Display */}
-                <div className="mb-4 bg-black/60 backdrop-blur-md px-8 py-3 rounded-full border border-yellow-500/30 flex flex-col items-center">
-                    <span className="text-white/40 text-[10px] uppercase font-bold tracking-tighter">Total Pot</span>
-                    <span className="text-yellow-500 font-black text-2xl md:text-3xl tracking-wide">
+            {/* Individually Positioned Center Components */}
+
+            {/* 💰 Pot Display */}
+            <div className="absolute top-[28%] left-1/2 -translate-x-1/2 z-[140] pointer-events-none">
+                <div className="bg-black/60 backdrop-blur-md px-8 py-3 rounded-full border border-yellow-500/30 flex flex-col items-center shadow-2xl">
+                    <span className="text-white/40 text-[10px] uppercase font-bold tracking-tighter leading-none mb-1">Total Pot</span>
+                    <span className="text-yellow-500 font-black text-2xl md:text-3xl tracking-wide leading-none">
                         💰 {gameState.pot.toLocaleString()}
                     </span>
                 </div>
+            </div>
 
-                {/* Phase & street info (Street Info) */}
-                <div className="mb-6 bg-white/5 border border-white/10 px-4 py-1.5 rounded-full text-[10px] md:text-xs text-white/60 font-black uppercase tracking-widest backdrop-blur-sm">
+            {/* 📊 Phase & street info (Street Info) */}
+            <div className="absolute top-[35%] left-1/2 -translate-x-1/2 z-[140] pointer-events-none">
+                <div className="bg-white/5 border border-white/10 px-6 py-2 rounded-full text-[10px] md:text-xs text-white/80 font-black uppercase tracking-widest backdrop-blur-md shadow-lg">
                     {gameState.phase} • {toCall > 0 ? `To Call: ${toCall}` : 'Check or Bet'}
                 </div>
+            </div>
 
-                {/* Community Cards */}
+            {/* 🃏 Community Cards */}
+            <div className="absolute top-[48%] left-1/2 -translate-x-1/2 z-[140] pointer-events-none">
                 <div className="flex space-x-2 md:space-x-3">
                     {gameState.communityCards.map((c, i) => (
-                        <Card key={i} card={c} className="scale-90 md:scale-110 shadow-2xl" />
+                        <Card key={i} card={c} className="scale-90 md:scale-125 shadow-2xl" />
                     ))}
                     {Array(5 - gameState.communityCards.length).fill(0).map((_, i) => (
                         <div key={i} className="w-14 h-20 md:w-20 md:h-28 rounded-xl border-2 border-white/5 bg-black/20 backdrop-blur-sm" />
