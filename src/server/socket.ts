@@ -159,59 +159,51 @@ io.on("connection", (socket) => {
 
         console.log(`[Socket] Starting game for room ${data.roomId}. Players: ${room.players.length}`);
 
-        if (room.players.length < 2 && room.maxPlayers < 2) {
-            console.log(`[Socket] Game start failed: not enough players`);
-            socket.emit("error", "至少需要 2 名玩家（包含 AI）才能開始遊戲");
-            return;
+        // 1. Fill with AI up to maxPlayers (This should always happen before starting)
+        const currentNonAI = room.players.filter(p => !p.isAI).length;
+        const targetAI = Math.max(0, room.maxPlayers - currentNonAI);
+
+        // Always ensure we have at least 2 players total including AI
+        const finalTargetAI = (room.players.length < 2 && targetAI === 0) ? 1 : targetAI;
+
+        // Clean existing AI to re-populate correctly based on new maxPlayers or room state
+        room.players = room.players.filter(p => !p.isAI);
+        for (let i = 0; i < finalTargetAI; i++) {
+            room.players.push({
+                id: `ai_${room.players.length}`,
+                name: `神貓 AI-${room.players.length + 1}`,
+                socketId: "",
+                isHost: false,
+                isAI: true
+            });
         }
 
-        // Mechanism: Chip Inheritance & Bankruptcy removal
+        // 2. Chip Inheritance & Bankruptcy removal (Only if game was already running)
         let previousPlayers = room.state?.players || [];
+        if (previousPlayers.length > 0) {
+            const bankruptNames = previousPlayers
+                .filter(p => p.chips < 20)
+                .map(p => p.name);
 
-        // 1. Identify bankrupt players (less than big blind)
-        const bankruptNames = previousPlayers
-            .filter(p => p.chips < 20) // Assuming BB is 20
-            .map(p => p.name);
+            // Notify and remove bankrupt players
+            const originalPlayersInRoom = [...room.players];
+            room.players = room.players.filter(p => !bankruptNames.includes(p.name));
 
-        // 2. Remove bankrupt players from room.players and notify human players
-        const originalPlayers = [...room.players];
-        room.players = room.players.filter(p => !bankruptNames.includes(p.name));
-
-        originalPlayers.forEach(p => {
-            if (bankruptNames.includes(p.name) && p.socketId) {
-                io.to(p.socketId).emit("force_leave", "籌碼不足，遺憾離場");
-            }
-        });
-
-        // 3. Fill with AI if necessary up to maxPlayers
-        if (room.players.length < room.maxPlayers) {
-            const currentNonAI = room.players.filter(p => !p.isAI).length;
-            const targetAI = room.maxPlayers - currentNonAI;
-
-            // Remove existing AIs if they exceed the new max
-            room.players = room.players.filter(p => !p.isAI);
-
-            for (let i = 0; i < targetAI; i++) {
-                room.players.push({
-                    id: `ai_${room.players.length}`,
-                    name: `神貓 AI-${room.players.length + 1}`,
-                    socketId: "",
-                    isHost: false,
-                    isAI: true
-                });
-            }
-        }
-
-        // 4. Tournament Winner Detection
-        if (room.players.length <= 1) {
-            io.to(data.roomId).emit("tournament_winner", {
-                winner: room.players[0]?.name || "None",
-                stats: {
-                    matchWins: 1
+            originalPlayersInRoom.forEach(p => {
+                if (bankruptNames.includes(p.name) && p.socketId) {
+                    io.to(p.socketId).emit("force_leave", "籌碼不足，遺憾離場");
                 }
             });
-            room.state = null; // Reset
-            return;
+
+            // Tournament Winner Detection (Only after someone is removed)
+            if (room.players.length <= 1) {
+                io.to(data.roomId).emit("tournament_winner", {
+                    winner: room.players[0]?.name || "None",
+                    stats: { matchWins: 1 }
+                });
+                room.state = null;
+                return;
+            }
         }
 
         const playerInfos = room.players.map((p) => {
@@ -227,7 +219,6 @@ io.on("connection", (socket) => {
 
         room.players.forEach((p, index) => {
             if (p.socketId) {
-                // For initial game_start, we send the masked state
                 const playerIdx = index;
                 const maskedState = {
                     ...room.state,
