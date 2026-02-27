@@ -572,22 +572,22 @@ const GameBoard: React.FC<GameBoardProps> = ({ initialGameState, playerIndex, so
                             </div>
                         </div>
 
-                        {/* Buttons - Dual Action */}
-                        <div className="flex flex-col gap-4 w-full mb-10">
+                        {/* Buttons - Horizontal Action Layout */}
+                        <div className="flex flex-row gap-3 w-full mb-10">
+                            <button
+                                onClick={() => window.location.href = "/Texas-Poker/lobby/"}
+                                className="flex-1 py-4 bg-white/5 hover:bg-white/10 text-white font-black rounded-[20px] border border-white/10 shadow-lg transition-all active:translate-y-1 uppercase tracking-tighter text-[10px] md:text-xs"
+                            >
+                                回到大廳 (Lobby)
+                            </button>
                             <button
                                 onClick={() => {
                                     const newRoomId = Math.random().toString(36).substring(2, 8).toUpperCase();
                                     window.location.href = `/Texas-Poker/room?id=${newRoomId}`;
                                 }}
-                                className="w-full py-5 bg-yellow-500 hover:bg-yellow-400 text-black font-black rounded-[20px] shadow-[0_6px_0_rgb(180,100,0)] transition-all active:translate-y-1 uppercase tracking-widest text-sm"
+                                className="flex-1 py-4 bg-yellow-500 hover:bg-yellow-400 text-black font-black rounded-[20px] shadow-[0_4px_0_rgb(180,100,0)] transition-all active:translate-y-1 uppercase tracking-tighter text-[10px] md:text-xs"
                             >
-                                再玩一場 (建立新局)
-                            </button>
-                            <button
-                                onClick={() => window.location.href = "/Texas-Poker/lobby/"}
-                                className="w-full py-5 bg-white/5 hover:bg-white/10 text-white font-black rounded-[20px] border border-white/10 shadow-[0_6px_0_rgba(255,255,255,0.05)] transition-all active:translate-y-1 uppercase tracking-widest text-sm"
-                            >
-                                回到大廳 (Lobby)
+                                再玩一場 (New)
                             </button>
                         </div>
                     </div>
