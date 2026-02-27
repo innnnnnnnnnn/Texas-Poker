@@ -161,7 +161,7 @@ const RoomContent = () => {
                 playerIndex={playerIndex}
                 socket={socket}
                 roomId={roomId as string}
-                onExit={() => router.push("/lobby")}
+                onExit={() => window.location.href = "/Texas-Poker/lobby/"}
                 onNextGame={startGame}
                 isHost={currentIsHost}
             />
@@ -179,7 +179,7 @@ const RoomContent = () => {
                     </div>
                     <div className="flex flex-col md:flex-row gap-2 w-full md:w-auto">
                         <button
-                            onClick={() => router.push("/lobby")}
+                            onClick={() => window.location.href = "/Texas-Poker/lobby/"}
                             className="px-6 py-2 bg-white/5 hover:bg-white/10 text-white/60 hover:text-white rounded-full text-xs font-bold border border-white/5 transition-all"
                         >
                             ⬅️ 回大廳
