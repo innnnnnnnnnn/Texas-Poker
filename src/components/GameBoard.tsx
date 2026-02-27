@@ -432,33 +432,34 @@ const GameBoard: React.FC<GameBoardProps> = ({ initialGameState, playerIndex, so
                     <div className="fixed bottom-32 md:bottom-36 left-1/2 -translate-x-1/2 z-[200] flex flex-col items-center w-[60%] pointer-events-none px-4">
                         <div className="w-full bg-black/60 backdrop-blur-3xl rounded-[32px] p-6 md:p-8 border border-white/20 shadow-[0_20px_80px_rgba(0,0,0,0.6)] pointer-events-auto flex flex-col items-center text-center animate-in fade-in zoom-in duration-300">
 
-                            {/* 獲勝宣告組 (Winning Announcement Group) */}
-                            <div className="mb-0 text-[10px] text-yellow-500/40 font-black uppercase tracking-[0.2em] animate-pulse">
+                            {/* 獲勝宣告組 (Winning Announcement Group) - 靜態 & 縮小 */}
+                            <div className="mb-0 text-[10px] text-yellow-500/40 font-black uppercase tracking-[0.2em]">
                                 🎊 Showdown 🎊
                             </div>
 
+                            <div className="h-3" /> {/* 12px 穩定間隔 */}
+
                             <div className="flex items-center space-x-2 mb-0">
-                                <div className="w-6 h-6 rounded-full bg-yellow-500 flex items-center justify-center text-xs shadow-lg">
+                                <div className="w-5 h-5 rounded-full bg-yellow-500 flex items-center justify-center text-[10px] shadow-lg">
                                     {gameState.winners[0]?.playerId && gameState.players.find(p => p.id === gameState.winners[0].playerId)?.isHuman ? '👤' : '🤖'}
                                 </div>
-                                <h2 className="text-white text-xl md:text-2xl font-black tracking-tight">
+                                <h2 className="text-white text-base font-black tracking-tight">
                                     {gameState.winners[0]
                                         ? (gameState.players.find(p => p.id === gameState.winners[0].playerId)?.name || "贏家")
                                         : "無人獲勝"}
                                 </h2>
                             </div>
 
-                            <div className="text-yellow-500 font-black text-3xl md:text-4xl mb-3 drop-shadow-[0_2px_15px_rgba(234,179,8,0.5)]">
+                            <div className="text-yellow-500 font-black text-2xl drop-shadow-[0_2px_10px_rgba(234,179,8,0.4)]">
                                 + {gameState.winners[0]?.amount.toLocaleString() || 0} 💰
                             </div>
 
-                            {/* 穩定呼吸空間 12px */}
-                            <div className="h-3" />
+                            <div className="h-3" /> {/* 12px 穩定間隔 */}
 
                             {/* 對局詳情組 (Hand Details Group) */}
                             <div className="flex flex-col items-center w-full">
                                 {/* 決戰五張牌 (Winning Cards) */}
-                                <div className="flex -space-x-4 md:-space-x-6 origin-top scale-[0.7] md:scale-95 mb-0">
+                                <div className="flex -space-x-4 md:-space-x-6 origin-top scale-[0.65] md:scale-85 mb-0">
                                     {gameState.winners[0]?.cards ? (
                                         gameState.winners[0].cards.map((c, i) => (
                                             <Card key={i} card={c} className="shadow-2xl ring-2 ring-white/10" />
@@ -470,33 +471,32 @@ const GameBoard: React.FC<GameBoardProps> = ({ initialGameState, playerIndex, so
                                     )}
                                 </div>
 
-                                {/* 牌型名稱 (Hand Name) - 極限緊貼 mt-[-28px] */}
-                                <div className="mt-[-28px] md:mt-[-40px] text-yellow-500/90 font-black text-sm md:text-base uppercase tracking-[0.3em] leading-none bg-black/60 px-6 py-2 rounded-full border border-yellow-500/20 backdrop-blur-xl z-20 shadow-xl">
+                                {/* 牌型名稱 (Hand Name) - 精密緊貼 mt-[-28px] */}
+                                <div className="mt-[-28px] md:mt-[-35px] text-yellow-500/90 font-black text-xs uppercase tracking-[0.2em] leading-none bg-black/60 px-4 py-1.5 rounded-full border border-yellow-500/20 backdrop-blur-xl z-20 shadow-xl">
                                     ( {gameState.winners[0]?.handName || "高牌"} )
                                 </div>
                             </div>
 
-                            {/* 分割空間 */}
-                            <div className="h-8" />
+                            <div className="h-3" /> {/* 12px 穩定間隔 */}
 
-                            {/* 動作按鈕組 (Action Buttons) */}
-                            <div className="grid grid-cols-2 gap-4 w-full md:max-w-md">
+                            {/* 動作按鈕組 (Action Buttons) - 緊湊長方形雙色版 */}
+                            <div className="flex justify-center gap-4 w-full">
                                 <button
                                     onClick={onExit}
-                                    className="py-4 bg-white/5 hover:bg-white/10 text-white/50 hover:text-white font-black rounded-2xl border border-white/5 transition-all active:scale-95 text-xs uppercase tracking-widest shadow-lg"
+                                    className="w-28 py-3 bg-red-600 hover:bg-red-500 text-white font-black rounded-xl shadow-[0_4px_0_rgb(150,0,0)] transition-all active:translate-y-1 text-[10px] uppercase tracking-widest"
                                 >
                                     EXIT
                                 </button>
                                 {isHost ? (
                                     <button
                                         onClick={onNextGame}
-                                        className="py-4 bg-yellow-500 hover:bg-yellow-400 text-black font-black rounded-2xl shadow-[0_6px_0_rgb(180,100,0)] transition-all active:translate-y-1 text-xs uppercase tracking-widest"
+                                        className="w-28 py-3 bg-yellow-500 hover:bg-yellow-400 text-black font-black rounded-xl shadow-[0_4px_0_rgb(180,100,0)] transition-all active:translate-y-1 text-[10px] uppercase tracking-widest"
                                     >
                                         NEXT
                                     </button>
                                 ) : (
-                                    <div className="flex items-center justify-center py-4 bg-black/40 text-yellow-500/30 font-black rounded-2xl border border-yellow-500/10 text-[10px] italic tracking-tighter shadow-inner">
-                                        WAITING FOR HOST...
+                                    <div className="flex items-center justify-center w-28 py-3 bg-black/40 text-yellow-500/30 font-black rounded-xl border border-yellow-500/10 text-[9px] italic tracking-tighter shadow-inner">
+                                        WAIT HOST
                                     </div>
                                 )}
                             </div>
