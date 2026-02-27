@@ -295,29 +295,40 @@ const GameBoard: React.FC<GameBoardProps> = ({ initialGameState, playerIndex, so
                 🚪
             </button>
 
-            {/* Result Overlay */}
+            {/* Result Overlay (Same Pos as Action Bar) */}
             {gameState.isFinished && (
-                <div className="fixed inset-0 bg-black/90 z-[500] flex flex-col items-center justify-center p-8 backdrop-blur-2xl">
-                    <div className="text-yellow-500 text-4xl md:text-6xl font-black mb-10 animate-pulse tracking-tighter">
-                        SHOWDOWN
-                    </div>
-                    <div className="w-full max-w-lg space-y-4">
-                        {gameState.winners.map((w, i) => (
-                            <div key={i} className="bg-gradient-to-r from-yellow-500/20 to-transparent p-6 rounded-3xl border border-yellow-500/50 flex justify-between items-center">
-                                <div>
-                                    <div className="text-yellow-500 text-[10px] uppercase font-black tracking-widest mb-1">WINNER ✨</div>
-                                    <div className="text-2xl font-black text-white">{gameState.players.find(p => p.id === w.playerId)?.name}</div>
-                                    {w.handName && <div className="px-3 py-1 bg-white/5 rounded-lg text-emerald-400 font-bold mt-2 text-xs inline-block">{w.handName}</div>}
+                <div className="fixed bottom-32 md:bottom-36 left-1/2 -translate-x-1/2 z-[500] flex flex-col items-center w-full max-w-sm px-4">
+                    <div className="w-full bg-black/80 backdrop-blur-3xl rounded-3xl p-6 border-2 border-yellow-500/50 shadow-[0_20px_50px_rgba(0,0,0,0.8)]">
+                        <div className="text-yellow-500 text-xs font-black mb-4 tracking-widest text-center uppercase">🎊 Showdown Result 🎊</div>
+
+                        <div className="space-y-3 mb-6">
+                            {gameState.winners.map((w, i) => (
+                                <div key={i} className="flex justify-between items-center bg-white/5 p-3 rounded-2xl border border-white/5">
+                                    <div className="flex flex-col">
+                                        <div className="text-[10px] text-yellow-500 font-bold uppercase tracking-tighter">Winner ✨</div>
+                                        <div className="text-white font-black text-sm">{gameState.players.find(p => p.id === w.playerId)?.name}</div>
+                                        {w.handName && <div className="text-emerald-400 text-[10px] font-bold mt-0.5">{w.handName}</div>}
+                                    </div>
+                                    <div className="text-yellow-400 font-black text-xl">+ {w.amount.toLocaleString()} 💰</div>
                                 </div>
-                                <div className="text-yellow-400 text-3xl font-black">+ {w.amount.toLocaleString()} 💰</div>
-                            </div>
-                        ))}
-                    </div>
-                    <div className="mt-12 flex gap-4 w-full max-w-lg">
-                        <button onClick={onNextGame} disabled={!isHost} className={`flex-1 py-5 rounded-3xl font-black text-xl shadow-2xl transition-all ${isHost ? 'bg-yellow-500 text-black active:scale-95' : 'bg-white/5 text-white/20 cursor-not-allowed'}`}>
-                            {isHost ? "NEXT ROUND" : "WAITING FOR HOST..."}
-                        </button>
-                        <button onClick={onExit} className="flex-1 py-5 bg-white/5 text-white border border-white/10 rounded-3xl font-black text-xl hover:bg-white/10 transition-all active:scale-95">EXIT</button>
+                            ))}
+                        </div>
+
+                        <div className="flex gap-2">
+                            <button
+                                onClick={onNextGame}
+                                disabled={!isHost}
+                                className={`flex-[2] py-3.5 rounded-2xl font-black text-xs transition-all tracking-widest ${isHost ? 'bg-yellow-500 text-black active:scale-95 shadow-lg shadow-yellow-500/20' : 'bg-white/5 text-white/20 cursor-not-allowed'}`}
+                            >
+                                {isHost ? "NEXT ROUND" : "WAITING FOR HOST"}
+                            </button>
+                            <button
+                                onClick={onExit}
+                                className="flex-1 py-3.5 bg-white/10 text-white border border-white/10 rounded-2xl font-black text-xs hover:bg-white/20 transition-all active:scale-95 uppercase tracking-widest"
+                            >
+                                Exit
+                            </button>
+                        </div>
                     </div>
                 </div>
             )}
