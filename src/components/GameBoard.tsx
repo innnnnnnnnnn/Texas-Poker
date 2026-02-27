@@ -504,10 +504,10 @@ const GameBoard: React.FC<GameBoardProps> = ({ initialGameState, playerIndex, so
             {showTournamentVictory && (
                 <div className="fixed inset-0 z-[1000] bg-black/95 backdrop-blur-3xl flex items-center justify-center p-6 animate-in fade-in zoom-in duration-500 overflow-y-auto">
                     <div className="max-w-md w-full flex flex-col items-center">
-                        {/* 🏆 Trophy */}
-                        <div className="relative mb-6">
+                        {/* 🏆 Trophy - Fixed Positioning & No Bounce */}
+                        <div className="relative mb-8 mt-10">
                             <div className="absolute inset-0 bg-yellow-500/20 blur-3xl rounded-full scale-150 animate-pulse" />
-                            <div className="text-8xl md:text-9xl drop-shadow-[0_0_50px_rgba(234,179,8,0.8)] relative z-10 animate-bounce">
+                            <div className="text-8xl md:text-9xl drop-shadow-[0_0_50px_rgba(234,179,8,0.8)] relative z-10">
                                 🏆
                             </div>
                         </div>
@@ -572,13 +572,22 @@ const GameBoard: React.FC<GameBoardProps> = ({ initialGameState, playerIndex, so
                             </div>
                         </div>
 
-                        {/* Buttons */}
-                        <div className="flex flex-col gap-4 w-full">
+                        {/* Buttons - Dual Action */}
+                        <div className="flex flex-col gap-4 w-full mb-10">
                             <button
-                                onClick={() => window.location.href = "/Texas-Poker/"}
+                                onClick={() => {
+                                    const newRoomId = Math.random().toString(36).substring(2, 8).toUpperCase();
+                                    window.location.href = `/Texas-Poker/room?id=${newRoomId}`;
+                                }}
                                 className="w-full py-5 bg-yellow-500 hover:bg-yellow-400 text-black font-black rounded-[20px] shadow-[0_6px_0_rgb(180,100,0)] transition-all active:translate-y-1 uppercase tracking-widest text-sm"
                             >
-                                回到大廳 / 再玩一場 (建立新局)
+                                再玩一場 (建立新局)
+                            </button>
+                            <button
+                                onClick={() => window.location.href = "/Texas-Poker/lobby/"}
+                                className="w-full py-5 bg-white/5 hover:bg-white/10 text-white font-black rounded-[20px] border border-white/10 shadow-[0_6px_0_rgba(255,255,255,0.05)] transition-all active:translate-y-1 uppercase tracking-widest text-sm"
+                            >
+                                回到大廳 (Lobby)
                             </button>
                         </div>
                     </div>
