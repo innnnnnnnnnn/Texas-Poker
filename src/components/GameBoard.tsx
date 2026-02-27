@@ -142,8 +142,14 @@ const GameBoard: React.FC<GameBoardProps> = ({ initialGameState, playerIndex, so
                                     </div>
                                 </div>
                                 <div className="h-0.5 bg-white/5 w-full mb-1" />
-                                <div className={`text-[9px] font-black text-center uppercase py-0.5 min-h-[14px] ${p.isFolded ? 'text-red-500' : 'text-emerald-400'}`}>
-                                    {p.isFolded ? 'Folded' : (p.lastAction || 'Wait')}
+                                <div className={`text-[10px] font-black text-center uppercase py-0.5 min-h-[16px] leading-tight ${p.isFolded ? 'text-red-500' : 'text-emerald-400'}`}>
+                                    {p.isFolded ? (
+                                        'Folded'
+                                    ) : (
+                                        p.currentBet > 0
+                                            ? <span className="text-yellow-400">{p.lastAction || 'Bet'} ${p.currentBet}</span>
+                                            : (p.lastAction || 'Wait')
+                                    )}
                                 </div>
                             </div>
 
@@ -158,13 +164,6 @@ const GameBoard: React.FC<GameBoardProps> = ({ initialGameState, playerIndex, so
                                             <Card isHidden className="scale-40 origin-top shadow-xl" />
                                         </>
                                     )}
-                                </div>
-                            )}
-
-                            {/* Current Bet (Flying area) */}
-                            {p.currentBet > 0 && !p.isFolded && (
-                                <div className="mt-1 bg-black/60 px-3 py-0.5 rounded-full border border-white/10 flex items-center space-x-1 shadow-lg">
-                                    <span className="text-[10px] text-yellow-500 font-bold">BET: {p.currentBet}</span>
                                 </div>
                             )}
                         </div>
