@@ -85,12 +85,14 @@ const GameBoard: React.FC<GameBoardProps> = ({ initialGameState, playerIndex, so
 
             {/* Individually Positioned Center Components */}
 
-            {/* 💰 Pot Display */}
+            {/* 💰 Pot Display (Single Line) */}
             <div className="absolute top-[22%] left-1/2 -translate-x-1/2 z-[140] pointer-events-none">
-                <div className="bg-black/60 backdrop-blur-md px-8 py-3 rounded-full border border-yellow-500/30 flex flex-col items-center shadow-2xl">
-                    <span className="text-white/40 text-[10px] uppercase font-bold tracking-tighter leading-none mb-1">Total Pot</span>
-                    <span className="text-yellow-500 font-black text-2xl md:text-3xl tracking-wide leading-none">
-                        💰 {gameState.pot.toLocaleString()}
+                <div className="bg-black/70 backdrop-blur-md px-6 py-2 rounded-full border border-yellow-500/30 flex items-center space-x-3 shadow-[0_0_30px_rgba(0,0,0,0.5)]">
+                    <span className="text-white/40 text-[10px] uppercase font-black tracking-widest">Pot</span>
+                    <div className="w-[1px] h-3 bg-white/10" />
+                    <span className="text-yellow-500 font-black text-xl md:text-2xl tracking-wide flex items-center">
+                        <span className="mr-1.5 opacity-80">💰</span>
+                        {gameState.pot.toLocaleString()}
                     </span>
                 </div>
             </div>
