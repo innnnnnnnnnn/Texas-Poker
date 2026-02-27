@@ -327,7 +327,7 @@ const GameBoard: React.FC<GameBoardProps> = ({ initialGameState, playerIndex, so
                             + {gameState.winners[0]?.amount.toLocaleString()} 💰
                         </div>
 
-                        {/* Layer 4: Cards & Hand Name (Zero Vertical Gap) */}
+                        {/* Layer 4: Cards & Hand Name (Stable Small Gap) */}
                         <div className="flex flex-col items-center w-full mb-3">
                             <div className="flex justify-center -space-x-6 mb-0">
                                 {gameState.winners[0]?.cards?.map((c, i) => (
@@ -337,7 +337,7 @@ const GameBoard: React.FC<GameBoardProps> = ({ initialGameState, playerIndex, so
                                 ))}
                             </div>
                             {gameState.winners[0]?.handName && (
-                                <div className="text-emerald-400 text-[9px] md:text-[10px] font-black opacity-90 mt-[-50px] md:mt-[-65px] leading-none">
+                                <div className="text-emerald-400 text-[9px] md:text-[10px] font-black opacity-90 mt-[-20px] md:mt-[-28px] leading-none">
                                     ( {gameState.winners[0].handName} )
                                 </div>
                             )}
