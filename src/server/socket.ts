@@ -26,6 +26,7 @@ interface Room {
 
 const rooms: Record<string, Room> = {};
 const playerRoomMap: Record<string, string> = {};
+const disconnectTimeouts: Record<string, NodeJS.Timeout> = {};
 
 const DIFFICULTY_MAP = {
     'Easy': '簡單',
@@ -36,8 +37,21 @@ const DIFFICULTY_MAP = {
 };
 
 io.on("connection", (socket) => {
+    // Mechanism C: Keep-alive ping handler
+    socket.on("ping", () => {
+        socket.emit("pong");
+    });
+
     socket.on("join_room", (data: { roomId: string, name: string, userId: string }) => {
         const { roomId, name, userId } = data;
+
+        // Mechanism B: Cancel pending disconnect timeout for this user
+        if (disconnectTimeouts[userId]) {
+            console.log(`[Server] Player ${userId} reconnected, cancelling removal.`);
+            clearTimeout(disconnectTimeouts[userId]);
+            delete disconnectTimeouts[userId];
+        }
+
         if (!rooms[roomId]) {
             rooms[roomId] = { id: roomId, players: [], state: null, difficulty: 'Medium', maxPlayers: 4 };
         }
@@ -77,6 +91,14 @@ io.on("connection", (socket) => {
             difficulty: room.difficulty,
             maxPlayers: room.maxPlayers
         });
+
+        // Re-sync game state if game is in progress
+        if (room.state && !room.state.isFinished) {
+            socket.emit("game_start", {
+                state: room.state,
+                playerIndex: existingPlayerIndex !== -1 ? existingPlayerIndex : room.players.length - 1
+            });
+        }
     });
 
     socket.on("set_max_players", (data: { roomId: string, maxPlayers: number }) => {
@@ -195,9 +217,30 @@ io.on("connection", (socket) => {
         const roomId = playerRoomMap[socket.id];
         if (roomId) {
             const room = rooms[roomId];
-            room.players = room.players.filter(p => p.socketId !== socket.id);
-            delete playerRoomMap[socket.id];
-            if (room.players.length === 0) delete rooms[roomId];
+            const player = room.players.find(p => p.socketId === socket.id);
+
+            if (player) {
+                console.log(`[Server] Player ${player.name} (${player.id}) disconnected. Waiting 30s grace period.`);
+
+                // Mechanism B: Set a 30s timeout before removing the player
+                disconnectTimeouts[player.id] = setTimeout(() => {
+                    console.log(`[Server] Grace period expired. Removing player ${player.name} from room ${roomId}.`);
+                    room.players = room.players.filter(p => p.id !== player.id);
+                    delete playerRoomMap[socket.id];
+                    delete disconnectTimeouts[player.id];
+
+                    if (room.players.length === 0) {
+                        delete rooms[roomId];
+                    } else {
+                        io.to(roomId).emit("room_update", {
+                            players: room.players.map(p => ({ id: p.id, name: p.name, isHost: p.isHost, ready: true, isAI: p.isAI })),
+                            count: room.players.length,
+                            difficulty: room.difficulty,
+                            maxPlayers: room.maxPlayers
+                        });
+                    }
+                }, 30000); // 30 seconds
+            }
         }
     });
 });

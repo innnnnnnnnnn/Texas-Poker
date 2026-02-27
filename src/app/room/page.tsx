@@ -92,7 +92,16 @@ const RoomContent = () => {
             setGameState(state);
         });
 
+        // Mechanism C: Keep-alive ping every 5 minutes
+        const pingInterval = setInterval(() => {
+            if (socket && socket.connected) {
+                console.log("[Room] Sending keep-alive ping...");
+                socket.emit("ping");
+            }
+        }, 300000); // 5 minutes
+
         return () => {
+            clearInterval(pingInterval);
             socket.disconnect();
         };
     }, [myId, roomId, myName]);
