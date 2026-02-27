@@ -218,7 +218,7 @@ const GameBoard: React.FC<GameBoardProps> = ({ initialGameState, playerIndex, so
                                 card={c}
                                 className={`
                                     shadow-2xl transition-all duration-300
-                                    ${gameState.currentPlayerIndex === playerIndex ? 'scale-110 md:scale-125 z-10' : 'scale-100 md:scale-110 opacity-80'}
+                                    ${gameState.currentPlayerIndex === playerIndex ? 'scale-110 md:scale-125 z-10' : 'scale-100 md:scale-110'}
                                     hover:translate-y-[-10px]
                                 `}
                             />
