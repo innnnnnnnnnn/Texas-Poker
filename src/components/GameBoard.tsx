@@ -190,7 +190,7 @@ const GameBoard: React.FC<GameBoardProps> = ({ initialGameState, playerIndex, so
                     {/* User Profile Info */}
                     <div className="flex flex-col items-center">
                         <div className={`
-                            w-14 h-14 md:w-18 md:h-18 rounded-full flex items-center justify-center text-2xl md:text-3xl shadow-2xl border-4 transition-all
+                            w-16 h-16 md:w-20 md:h-20 rounded-full flex items-center justify-center text-3xl md:text-4xl shadow-2xl border-4 transition-all
                             ${gameState.currentPlayerIndex === playerIndex ? 'bg-yellow-500 border-yellow-400 scale-110' : 'bg-gray-800 border-white/10'}
                         `}>
                             👤
