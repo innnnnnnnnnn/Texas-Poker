@@ -16,7 +16,7 @@ const SignInPage = () => {
     // 如果已經登入，自動跳轉到大廳
     useEffect(() => {
         if (status === "authenticated") {
-            window.location.href = "/texas/lobby/";
+            window.location.href = "/Texas-Poker/lobby/";
         }
     }, [status]);
 

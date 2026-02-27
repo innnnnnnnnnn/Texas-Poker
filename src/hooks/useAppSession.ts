@@ -75,7 +75,7 @@ export const useAppSession = () => {
         setUser(null);
         setStatus("unauthenticated");
         // Force redirect to signin
-        window.location.href = (process.env.NEXT_PUBLIC_BASE_PATH || "/texas") + "/auth/signin/";
+        window.location.href = (process.env.NEXT_PUBLIC_BASE_PATH || "/Texas-Poker") + "/auth/signin/";
     };
 
     const sessionObject = useMemo(() => (user ? { user } : null), [user]);

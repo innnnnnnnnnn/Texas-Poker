@@ -11,9 +11,9 @@ export default function Home() {
   useEffect(() => {
     console.log("[Home] Auth Status:", status);
     if (status === "unauthenticated") {
-      window.location.href = "/texas/auth/signin/";
+      window.location.href = "/Texas-Poker/auth/signin/";
     } else if (status === "authenticated") {
-      window.location.href = "/texas/lobby/";
+      window.location.href = "/Texas-Poker/lobby/";
     }
   }, [status]);
 
