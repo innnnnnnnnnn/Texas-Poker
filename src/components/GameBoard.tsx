@@ -275,7 +275,7 @@ const GameBoard: React.FC<GameBoardProps> = ({ initialGameState, playerIndex, so
 
                             {/* Cards for other players (reveal on game finish or if spectating/masked) */}
                             {!isMe && !p.isFolded && (
-                                <div className="flex -space-x-6 mt-1 translate-y-[-4px]">
+                                <div className="flex -space-x-2 mt-1 translate-y-[-4px]">
                                     {p.hand && p.hand.length > 0 ? (
                                         p.hand.map((c, i) => <Card key={i} card={c} className="scale-40 origin-top shadow-xl" />)
                                     ) : (
@@ -308,7 +308,7 @@ const GameBoard: React.FC<GameBoardProps> = ({ initialGameState, playerIndex, so
                     </div>
 
                     {/* Focus Cards */}
-                    <div className="flex -space-x-10 md:-space-x-12 translate-y-[-4px]">
+                    <div className="flex -space-x-4 md:-space-x-12 translate-y-[-4px]">
                         {!gameState.players[viewFocusIndex]?.isFolded && (gameState.players[viewFocusIndex]?.hand || []).map((c, i) => (
                             <Card
                                 key={i}
@@ -322,7 +322,7 @@ const GameBoard: React.FC<GameBoardProps> = ({ initialGameState, playerIndex, so
                         ))}
                         {gameState.players[viewFocusIndex]?.isFolded && <div className="text-red-500 font-black text-2xl uppercase tracking-tighter opacity-50">FOLDED</div>}
                         {!gameState.players[viewFocusIndex]?.isFolded && (!gameState.players[viewFocusIndex]?.hand || gameState.players[viewFocusIndex].hand.length === 0) && (
-                            <div className="flex -space-x-8">
+                            <div className="flex -space-x-4">
                                 <Card isHidden className="scale-100 md:scale-110" />
                                 <Card isHidden className="scale-100 md:scale-110" />
                             </div>
@@ -455,7 +455,7 @@ const GameBoard: React.FC<GameBoardProps> = ({ initialGameState, playerIndex, so
                             {/* 對局詳情組 (Hand Details Group) */}
                             <div className="flex flex-col items-center w-full">
                                 {/* 決戰五張牌 (Winning Cards) */}
-                                <div className="flex -space-x-4 md:-space-x-6 origin-top scale-[0.65] md:scale-85 mb-0">
+                                <div className="flex -space-x-2 md:-space-x-6 origin-top scale-[0.65] md:scale-85 mb-0">
                                     {gameState.winners[0]?.cards ? (
                                         gameState.winners[0].cards.map((c, i) => (
                                             <Card key={i} card={c} className="shadow-2xl ring-2 ring-white/10" />
