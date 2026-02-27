@@ -61,13 +61,13 @@ const GameBoard: React.FC<GameBoardProps> = ({ initialGameState, playerIndex, so
         const relativeIndex = (index - playerIndex + 8) % 8;
         const positions = [
             { bottom: '15%', left: '50%', transform: 'translateX(-50%)' },          // Seat 0 (Me)
-            { bottom: '8%', left: '5%', transform: 'none' },                        // Seat 1 (Downstream 1)
+            { bottom: '6%', left: '5%', transform: 'none' },                        // Seat 1 (Downstream 1)
             { bottom: '28%', left: '2%', transform: 'none' },                       // Seat 2 (Downstream 2)
             { top: '12%', left: '5%', transform: 'none' },                         // Seat 3 (Downstream 3)
             { top: '5%', left: '50%', transform: 'translateX(-50%)' },              // Seat 4 (Top Center)
             { top: '12%', right: '5%', transform: 'none' },                        // Seat 5 (Upstream 3)
             { bottom: '28%', right: '2%', transform: 'none' },                      // Seat 6 (Upstream 2)
-            { bottom: '8%', right: '5%', transform: 'none' },                       // Seat 7 (Upstream 1)
+            { bottom: '6%', right: '5%', transform: 'none' },                       // Seat 7 (Upstream 1)
         ];
         return positions[relativeIndex];
     };
@@ -86,7 +86,7 @@ const GameBoard: React.FC<GameBoardProps> = ({ initialGameState, playerIndex, so
             {/* Individually Positioned Center Components */}
 
             {/* 💰 Pot Display (Single Line) */}
-            <div className="absolute top-[22%] left-1/2 -translate-x-1/2 z-[140] pointer-events-none">
+            <div className="absolute top-[23%] left-1/2 -translate-x-1/2 z-[140] pointer-events-none">
                 <div className="bg-black/70 backdrop-blur-md px-4 py-1.5 rounded-full border border-yellow-500/30 flex items-center space-x-2 shadow-[0_0_30px_rgba(0,0,0,0.5)]">
                     <span className="text-white/40 text-[10px] uppercase font-black tracking-widest">Pot</span>
                     <div className="w-[1px] h-3 bg-white/10" />
@@ -297,7 +297,8 @@ const GameBoard: React.FC<GameBoardProps> = ({ initialGameState, playerIndex, so
             {/* Exit Button - Top Left */}
             <button
                 onClick={onExit}
-                className="fixed top-6 left-6 z-50 p-3 bg-black/40 backdrop-blur-md rounded-full border border-white/10 hover:bg-red-900/40 text-white/40 hover:text-white transition-all shadow-xl"
+                className="fixed z-50 p-3 bg-black/40 backdrop-blur-md rounded-full border border-white/10 hover:bg-red-900/40 text-white/40 hover:text-white transition-all shadow-xl"
+                style={{ top: '5%', left: '5%' }}
                 title="Exit Game"
             >
                 🚪
