@@ -411,7 +411,7 @@ const GameBoard: React.FC<GameBoardProps> = ({ initialGameState, playerIndex, so
             {/* Exit Button - Top Left */}
             <button
                 onClick={onExit}
-                className="fixed z-50 p-3 bg-black/40 backdrop-blur-md rounded-full border border-white/10 hover:bg-red-900/40 text-white/40 hover:text-white transition-all shadow-xl"
+                className="fixed z-[100000] p-3 bg-black/40 backdrop-blur-md rounded-full border border-white/10 hover:bg-red-900/40 text-white/40 hover:text-white transition-all shadow-xl"
                 style={{ top: '10px', left: '10px' }}
                 title="Exit Game"
             >
