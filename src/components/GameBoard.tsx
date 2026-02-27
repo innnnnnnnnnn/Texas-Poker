@@ -142,30 +142,18 @@ const GameBoard: React.FC<GameBoardProps> = ({ initialGameState, playerIndex, so
                                     </div>
                                 </div>
                                 <div className="h-0.5 bg-white/5 w-full mb-1" />
-                                {p.isFolded ? (
-                                    <div className="text-red-500 text-[9px] font-black text-center uppercase py-0.5">Folded</div>
-                                ) : (
-                                    <div className="text-emerald-400 text-[9px] font-black text-center uppercase py-0.5 min-h-[14px]">
-                                        {p.lastAction || 'Wait'}
-                                    </div>
-                                )}
+                                <div className={`text-[9px] font-black text-center uppercase py-0.5 min-h-[14px] ${p.isFolded ? 'text-red-500' : 'text-emerald-400'}`}>
+                                    {p.isFolded ? 'Folded' : (p.lastAction || 'Wait')}
+                                </div>
                             </div>
 
-                            {/* Cards for this player */}
-                            <div className="flex -space-x-6 mt-1 translate-y-[-4px]">
-                                {p.isFolded ? null : (
-                                    <>
-                                        {isMe ? (
-                                            p.hand.map((c, i) => <Card key={i} card={c} className="scale-50 origin-top shadow-xl" />)
-                                        ) : (
-                                            <>
-                                                <Card isHidden className="scale-50 origin-top shadow-xl" />
-                                                <Card isHidden className="scale-50 origin-top shadow-xl" />
-                                            </>
-                                        )}
-                                    </>
-                                )}
-                            </div>
+                            {/* Cards for other players (on table) */}
+                            {!isMe && !p.isFolded && (
+                                <div className="flex -space-x-6 mt-1 translate-y-[-4px]">
+                                    <Card isHidden className="scale-40 origin-top shadow-xl" />
+                                    <Card isHidden className="scale-40 origin-top shadow-xl" />
+                                </div>
+                            )}
 
                             {/* Current Bet (Flying area) */}
                             {p.currentBet > 0 && !p.isFolded && (
@@ -178,6 +166,41 @@ const GameBoard: React.FC<GameBoardProps> = ({ initialGameState, playerIndex, so
                 );
             })}
 
+            {/* My Dedicated Hand & Info Area (Bottom) */}
+            <div className="fixed bottom-0 left-0 right-0 h-32 md:h-40 z-40 bg-gradient-to-t from-black via-black/80 to-transparent flex items-center justify-center px-4">
+                <div className="flex items-center space-x-6 mb-2">
+                    {/* User Profile Info */}
+                    <div className="flex flex-col items-center">
+                        <div className={`
+                            w-16 h-16 md:w-20 md:h-20 rounded-full flex items-center justify-center text-3xl md:text-4xl shadow-2xl border-4 transition-all
+                            ${gameState.currentPlayerIndex === playerIndex ? 'bg-yellow-500 border-yellow-400 scale-110' : 'bg-gray-800 border-white/10'}
+                        `}>
+                            👤
+                        </div>
+                        <div className="mt-2 text-center">
+                            <div className="text-white font-black text-sm md:text-base leading-none">{me.name}</div>
+                            <div className="text-yellow-500 font-black text-xs md:text-sm mt-1">💰 {me.chips.toLocaleString()}</div>
+                        </div>
+                    </div>
+
+                    {/* User Cards */}
+                    <div className="flex -space-x-10 md:-space-x-12 translate-y-[-4px]">
+                        {!me.isFolded && me.hand.map((c, i) => (
+                            <Card
+                                key={i}
+                                card={c}
+                                className={`
+                                    shadow-2xl transition-all duration-300
+                                    ${gameState.currentPlayerIndex === playerIndex ? 'scale-110 md:scale-125 z-10' : 'scale-100 md:scale-110 opacity-80'}
+                                    hover:translate-y-[-10px]
+                                `}
+                            />
+                        ))}
+                        {me.isFolded && <div className="text-red-500 font-black text-2xl uppercase tracking-tighter opacity-50">FOLDED</div>}
+                    </div>
+                </div>
+            </div>
+
             {/* Error Message Toast */}
             {error && (
                 <div className="fixed top-20 left-1/2 -translate-x-1/2 z-[200] bg-red-600 text-white px-6 py-3 rounded-full font-black shadow-2xl border-2 border-white/20 animate-bounce">
@@ -187,15 +210,15 @@ const GameBoard: React.FC<GameBoardProps> = ({ initialGameState, playerIndex, so
 
             {/* Action Bar (Bottom Right) */}
             {isMyTurn && (
-                <div className="fixed bottom-6 right-6 z-[100] flex flex-col items-end w-full max-w-md pointer-events-none">
-                    <div className="w-full bg-black/80 backdrop-blur-xl rounded-3xl p-6 border border-white/10 shadow-2xl pointer-events-auto">
-                        <div className="flex justify-between items-center mb-4">
-                            <span className="text-white/60 text-[10px] font-black uppercase tracking-widest">Raise Control</span>
-                            <span className="text-yellow-500 font-black text-lg">💰 {raiseAmount}</span>
+                <div className="fixed bottom-32 md:bottom-36 right-4 md:right-8 z-[100] flex flex-col items-end w-full max-w-sm pointer-events-none">
+                    <div className="w-full bg-black/95 backdrop-blur-2xl rounded-3xl p-5 border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.8)] pointer-events-auto">
+                        <div className="flex justify-between items-center mb-3">
+                            <span className="text-white/40 text-[9px] font-black uppercase tracking-widest">Raise To</span>
+                            <span className="text-yellow-500 font-black text-xl">💰 {raiseAmount}</span>
                         </div>
 
                         {/* Bet Slider */}
-                        <div className="flex items-center space-x-4 mb-6">
+                        <div className="flex items-center space-x-4 mb-4">
                             <input
                                 type="range"
                                 min={minRaise}
@@ -208,18 +231,18 @@ const GameBoard: React.FC<GameBoardProps> = ({ initialGameState, playerIndex, so
                         </div>
 
                         {/* Quick Action Buttons */}
-                        <div className="grid grid-cols-4 gap-2 mb-6 text-[9px] font-black">
-                            <button onClick={() => setRaiseAmount(Math.floor(gameState.pot * 0.5))} className="py-2 bg-white/5 rounded-lg border border-white/10 text-white/60 hover:bg-white/10 transition-colors uppercase">1/2 Pot</button>
-                            <button onClick={() => setRaiseAmount(Math.floor(gameState.pot * 0.75))} className="py-2 bg-white/5 rounded-lg border border-white/10 text-white/60 hover:bg-white/10 transition-colors uppercase">3/4 Pot</button>
-                            <button onClick={() => setRaiseAmount(gameState.pot)} className="py-2 bg-white/5 rounded-lg border border-white/10 text-white/60 hover:bg-white/10 transition-colors uppercase">Pot</button>
-                            <button onClick={() => setRaiseAmount(me.chips + me.currentBet)} className="py-2 bg-red-900/40 rounded-lg border border-red-500/50 text-red-400 hover:bg-red-900/60 transition-colors uppercase">All-in</button>
+                        <div className="grid grid-cols-4 gap-1.5 mb-4 text-[9px] font-black">
+                            <button onClick={() => setRaiseAmount(Math.floor(gameState.pot * 0.5))} className="py-2 bg-white/5 rounded-lg border border-white/5 text-white/40 hover:bg-white/10 transition-colors">1/2 POT</button>
+                            <button onClick={() => setRaiseAmount(Math.floor(gameState.pot * 0.75))} className="py-2 bg-white/5 rounded-lg border border-white/5 text-white/40 hover:bg-white/10 transition-colors">3/4 POT</button>
+                            <button onClick={() => setRaiseAmount(gameState.pot)} className="py-2 bg-white/5 rounded-lg border border-white/5 text-white/40 hover:bg-white/10 transition-colors">POT</button>
+                            <button onClick={() => setRaiseAmount(me.chips + me.currentBet)} className="py-2 bg-red-900/20 rounded-lg border border-red-500/30 text-red-500/80 hover:bg-red-900/40 transition-colors">ALL-IN</button>
                         </div>
 
                         {/* Primary Interaction Buttons */}
-                        <div className="grid grid-cols-3 gap-3">
+                        <div className="grid grid-cols-3 gap-2">
                             <button
                                 onClick={() => handleAction('Fold')}
-                                className="py-4 bg-gray-800 hover:bg-gray-700 text-white font-black rounded-2xl transition-all shadow-lg active:scale-95 border border-white/5"
+                                className="py-3.5 bg-gray-800 hover:bg-gray-700 text-white font-black rounded-2xl transition-all shadow-lg active:scale-95 border border-white/5"
                             >
                                 FOLD
                             </button>
@@ -227,26 +250,26 @@ const GameBoard: React.FC<GameBoardProps> = ({ initialGameState, playerIndex, so
                             {toCall <= 0 ? (
                                 <button
                                     onClick={() => handleAction('Check')}
-                                    className="py-4 bg-blue-600 hover:bg-blue-500 text-white font-black rounded-2xl transition-all shadow-lg active:scale-95 shadow-blue-500/20 border border-blue-400/50"
+                                    className="py-3.5 bg-blue-600 hover:bg-blue-500 text-white font-black rounded-2xl transition-all shadow-lg active:scale-95 shadow-blue-500/20 border border-blue-400/50"
                                 >
                                     CHECK
                                 </button>
                             ) : (
                                 <button
                                     onClick={() => handleAction('Call')}
-                                    className="py-4 bg-indigo-600 hover:bg-indigo-500 text-white font-black rounded-2xl transition-all shadow-lg active:scale-95 shadow-indigo-500/20 border border-indigo-400/50 flex flex-col items-center justify-center leading-none"
+                                    className="py-3.5 bg-indigo-600 hover:bg-indigo-500 text-white font-black rounded-2xl transition-all shadow-lg active:scale-95 shadow-indigo-500/20 border border-indigo-400/50 flex flex-col items-center justify-center leading-tight"
                                 >
-                                    <span>CALL</span>
-                                    <span className="text-[9px] mt-1 opacity-80">{toCall}</span>
+                                    <span className="text-xs">CALL</span>
+                                    <span className="text-[9px] opacity-70">{toCall}</span>
                                 </button>
                             )}
 
                             <button
                                 onClick={() => handleAction('Raise', raiseAmount)}
-                                className="py-4 bg-yellow-500 hover:bg-yellow-400 text-black font-black rounded-2xl transition-all shadow-lg active:scale-95 shadow-yellow-500/20 border-b-4 border-yellow-700 flex flex-col items-center justify-center leading-none"
+                                className="py-3.5 bg-yellow-500 hover:bg-yellow-400 text-black font-black rounded-2xl transition-all shadow-lg active:scale-95 shadow-yellow-500/20 border-b-4 border-yellow-700 flex flex-col items-center justify-center leading-tight"
                             >
-                                <span>{toCall <= 0 ? 'BET' : 'RAISE'}</span>
-                                <span className="text-[9px] mt-1 opacity-80">{raiseAmount}</span>
+                                <span className="text-xs">{toCall <= 0 ? 'BET' : 'RAISE'}</span>
+                                <span className="text-[9px] opacity-70">{raiseAmount}</span>
                             </button>
                         </div>
                     </div>
