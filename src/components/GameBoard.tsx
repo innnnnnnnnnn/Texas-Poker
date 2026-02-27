@@ -62,11 +62,11 @@ const GameBoard: React.FC<GameBoardProps> = ({ initialGameState, playerIndex, so
         const positions = [
             { bottom: '15%', left: '50%', transform: 'translateX(-50%)' },          // Seat 0 (Me)
             { bottom: '5%', left: '5%', transform: 'none' },                        // Seat 1 (Downstream 1)
-            { bottom: '24%', left: '2%', transform: 'none' },                       // Seat 2 (Downstream 2)
-            { top: '14%', left: '5%', transform: 'none' },                         // Seat 3 (Downstream 3)
-            { top: '5%', left: '50%', transform: 'translateX(-50%)' },              // Seat 4 (Top Center)
-            { top: '14%', right: '5%', transform: 'none' },                        // Seat 5 (Upstream 3)
-            { bottom: '24%', right: '2%', transform: 'none' },                      // Seat 6 (Upstream 2)
+            { bottom: '28%', left: '2%', transform: 'none' },                       // Seat 2 (Downstream 2)
+            { top: '10%', left: '5%', transform: 'none' },                         // Seat 3 (Downstream 3)
+            { top: '2%', left: '50%', transform: 'translateX(-50%)' },              // Seat 4 (Top Center)
+            { top: '10%', right: '5%', transform: 'none' },                        // Seat 5 (Upstream 3)
+            { bottom: '28%', right: '2%', transform: 'none' },                      // Seat 6 (Upstream 2)
             { bottom: '5%', right: '5%', transform: 'none' },                       // Seat 7 (Upstream 1)
         ];
         return positions[relativeIndex];
@@ -103,7 +103,7 @@ const GameBoard: React.FC<GameBoardProps> = ({ initialGameState, playerIndex, so
             </div>
 
             {/* 🃏 Community Cards */}
-            <div className="absolute top-[35%] left-1/2 -translate-x-1/2 z-[140] pointer-events-none">
+            <div className="absolute top-[30%] left-1/2 -translate-x-1/2 z-[140] pointer-events-none">
                 <div className="flex space-x-2 md:space-x-3">
                     {gameState.communityCards.map((c, i) => (
                         <Card key={i} card={c} className="scale-90 md:scale-125 shadow-2xl" />
