@@ -579,7 +579,7 @@ const GameBoard: React.FC<GameBoardProps> = ({ initialGameState, playerIndex, so
                         </div>
 
                         {/* Buttons - Horizontal Action Layout - Mega Text */}
-                        <div className="flex flex-row gap-3 w-full mt-6 mb-10">
+                        <div className="flex flex-row gap-3 w-full mt-6">
                             <button
                                 onClick={() => window.location.href = "/Texas-Poker/lobby/"}
                                 className="flex-1 py-5 bg-white/10 hover:bg-white/20 text-white font-black rounded-[24px] border border-white/20 shadow-xl transition-all active:translate-y-1 uppercase text-sm md:text-lg"
