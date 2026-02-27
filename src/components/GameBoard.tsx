@@ -186,18 +186,17 @@ const GameBoard: React.FC<GameBoardProps> = ({ initialGameState, playerIndex, so
 
             {/* My Dedicated Hand & Info Area (Bottom) - Cards on Top! */}
             <div className="fixed bottom-0 left-0 right-0 h-32 md:h-40 z-[150] bg-gradient-to-t from-black via-black/80 to-transparent flex items-center justify-center px-4 pointer-events-none">
-                <div className="flex items-center space-x-6 mb-2 pointer-events-auto">
+                <div className="flex items-center space-x-3 mb-2 pointer-events-auto">
                     {/* User Profile Info */}
                     <div className="flex flex-col items-center">
                         <div className={`
-                            w-16 h-16 md:w-20 md:h-20 rounded-full flex items-center justify-center text-3xl md:text-4xl shadow-2xl border-4 transition-all
+                            w-12 h-12 md:w-16 md:h-16 rounded-full flex items-center justify-center text-2xl md:text-3xl shadow-2xl border-4 transition-all
                             ${gameState.currentPlayerIndex === playerIndex ? 'bg-yellow-500 border-yellow-400 scale-110' : 'bg-gray-800 border-white/10'}
                         `}>
                             👤
                         </div>
-                        <div className="mt-2 text-center">
-                            <div className="text-white font-black text-sm md:text-base leading-none">{me.name}</div>
-                            <div className="text-yellow-500 font-black text-xs md:text-sm mt-1">💰 {me.chips.toLocaleString()}</div>
+                        <div className="mt-1 text-center">
+                            <div className="text-yellow-500 font-black text-[10px] md:text-xs">💰 {me.chips.toLocaleString()}</div>
                         </div>
                     </div>
 
