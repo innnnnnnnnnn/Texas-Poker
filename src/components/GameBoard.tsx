@@ -87,7 +87,7 @@ const GameBoard: React.FC<GameBoardProps> = ({ initialGameState, playerIndex, so
 
             {/* 💰 Pot Display (Single Line) */}
             <div className="absolute top-[22%] left-1/2 -translate-x-1/2 z-[140] pointer-events-none">
-                <div className="bg-black/70 backdrop-blur-md px-6 py-2 rounded-full border border-yellow-500/30 flex items-center space-x-3 shadow-[0_0_30px_rgba(0,0,0,0.5)]">
+                <div className="bg-black/70 backdrop-blur-md px-4 py-1.5 rounded-full border border-yellow-500/30 flex items-center space-x-2 shadow-[0_0_30px_rgba(0,0,0,0.5)]">
                     <span className="text-white/40 text-[10px] uppercase font-black tracking-widest">Pot</span>
                     <div className="w-[1px] h-3 bg-white/10" />
                     <span className="text-yellow-500 font-black text-xl md:text-2xl tracking-wide flex items-center">
@@ -99,7 +99,7 @@ const GameBoard: React.FC<GameBoardProps> = ({ initialGameState, playerIndex, so
 
             {/* 📊 Phase & street info (Street Info) */}
             <div className="absolute top-[43%] left-1/2 -translate-x-1/2 z-[140] pointer-events-none text-center">
-                <div className="bg-white/5 border border-white/10 px-6 py-2 rounded-full text-[10px] md:text-xs text-white/80 font-black uppercase tracking-widest backdrop-blur-md shadow-lg whitespace-nowrap min-w-max">
+                <div className="bg-white/5 border border-white/10 px-4 py-1.5 rounded-full text-[10px] md:text-xs text-white/80 font-black uppercase tracking-widest backdrop-blur-md shadow-lg whitespace-nowrap min-w-max">
                     {gameState.phase} • {toCall > 0 ? `To Call: ${toCall}` : 'Check or Bet'}
                 </div>
             </div>
