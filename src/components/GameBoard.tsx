@@ -166,9 +166,9 @@ const GameBoard: React.FC<GameBoardProps> = ({ initialGameState, playerIndex, so
                 );
             })}
 
-            {/* My Dedicated Hand & Info Area (Bottom) */}
-            <div className="fixed bottom-0 left-0 right-0 h-32 md:h-40 z-40 bg-gradient-to-t from-black via-black/80 to-transparent flex items-center justify-center px-4">
-                <div className="flex items-center space-x-6 mb-2">
+            {/* My Dedicated Hand & Info Area (Bottom) - Cards on Top! */}
+            <div className="fixed bottom-0 left-0 right-0 h-32 md:h-40 z-[150] bg-gradient-to-t from-black via-black/80 to-transparent flex items-center justify-center px-4 pointer-events-none">
+                <div className="flex items-center space-x-6 mb-2 pointer-events-auto">
                     {/* User Profile Info */}
                     <div className="flex flex-col items-center">
                         <div className={`
@@ -208,10 +208,10 @@ const GameBoard: React.FC<GameBoardProps> = ({ initialGameState, playerIndex, so
                 </div>
             )}
 
-            {/* Action Bar (Bottom Right) */}
+            {/* Action Bar (Centered & Semi-transparent) */}
             {isMyTurn && (
-                <div className="fixed bottom-32 md:bottom-36 right-4 md:right-8 z-[100] flex flex-col items-end w-full max-w-sm pointer-events-none">
-                    <div className="w-full bg-black/95 backdrop-blur-2xl rounded-3xl p-5 border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.8)] pointer-events-auto">
+                <div className="fixed bottom-32 md:bottom-36 left-1/2 -translate-x-1/2 z-[100] flex flex-col items-center w-full max-w-sm pointer-events-none px-4">
+                    <div className="w-full bg-black/60 backdrop-blur-3xl rounded-3xl p-5 border border-white/20 shadow-[0_20px_50px_rgba(0,0,0,0.6)] pointer-events-auto">
                         <div className="flex justify-between items-center mb-3">
                             <span className="text-white/40 text-[9px] font-black uppercase tracking-widest">Raise To</span>
                             <span className="text-yellow-500 font-black text-xl">💰 {raiseAmount}</span>
