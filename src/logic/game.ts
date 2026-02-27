@@ -253,10 +253,10 @@ function showdown(state: GameState): GameState {
     })).sort((a, b) => compareHandRanks(b.rank, a.rank));
 
     const winnerId = results[0].playerId;
-    return resolveWinner(state, winnerId, HAND_TYPE_CHINESE[results[0].rank.type]);
+    return resolveWinner(state, winnerId, HAND_TYPE_CHINESE[results[0].rank.type], results[0].rank.cards);
 }
 
-function resolveWinner(state: GameState, winnerId: string, handName?: string): GameState {
+function resolveWinner(state: GameState, winnerId: string, handName?: string, cards?: Card[]): GameState {
     const players = state.players.map(p => {
         if (p.id === winnerId) {
             return { ...p, chips: p.chips + state.pot };
@@ -269,7 +269,7 @@ function resolveWinner(state: GameState, winnerId: string, handName?: string): G
         players,
         isFinished: true,
         phase: 'Showdown',
-        winners: [{ playerId: winnerId, amount: state.pot, handName }],
+        winners: [{ playerId: winnerId, amount: state.pot, handName, cards }],
         history: [...state.history, `Winner: ${players.find(p => p.id === winnerId)?.name} wins ${state.pot} chips.`]
     };
 }

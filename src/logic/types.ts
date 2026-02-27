@@ -66,7 +66,7 @@ export interface GameState {
     phase: GamePhase;
     currentMaxBet: number;
     lastRaiserIndex: number | null;
-    winners: { playerId: string, amount: number, handName?: string }[];
+    winners: { playerId: string, amount: number, handName?: string, cards?: Card[] }[];
     isFinished: boolean;
     history: string[]; // Log of actions
 }

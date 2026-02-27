@@ -304,31 +304,57 @@ const GameBoard: React.FC<GameBoardProps> = ({ initialGameState, playerIndex, so
             </button>
 
             {/* Result Overlay (Same Pos as Action Bar) */}
+            {/* 🏆 Result Overlay (Strict 30% Width 5-Layer Vertical Layout) */}
             {gameState.isFinished && (
-                <div className="fixed bottom-32 md:bottom-36 left-1/2 -translate-x-1/2 z-[500] flex flex-col items-center w-[30vw] min-w-[280px] px-4">
-                    <div className="w-full bg-black/85 backdrop-blur-3xl rounded-3xl p-5 border-2 border-yellow-500/50 shadow-[0_25px_60px_rgba(0,0,0,0.9)]">
-                        <div className="text-yellow-500 text-[10px] font-black mb-4 tracking-[0.2em] text-center uppercase border-b border-yellow-500/10 pb-3">🎊 Showdown Result 🎊</div>
+                <div className="fixed bottom-32 md:bottom-36 left-1/2 -translate-x-1/2 z-[500] flex flex-col items-center w-[30vw] px-4">
+                    <div className="w-full bg-black/90 backdrop-blur-3xl rounded-3xl p-5 border-2 border-yellow-500/50 shadow-[0_30px_70px_rgba(0,0,0,0.9)] flex flex-col items-center">
 
-                        <div className="space-y-3 mb-5">
-                            {gameState.winners.map((w, i) => (
-                                <div key={i} className="flex flex-col bg-white/5 p-3 rounded-2xl border border-white/5">
-                                    <div className="flex justify-between items-center mb-1">
-                                        <div className="text-[10px] text-yellow-500 font-black uppercase tracking-tighter">Winner ✨</div>
-                                        <div className="text-yellow-400 font-black text-lg">+ {w.amount.toLocaleString()} 💰</div>
-                                    </div>
-                                    <div className="flex items-baseline space-x-2">
-                                        <div className="text-white font-black text-sm">{gameState.players.find(p => p.id === w.playerId)?.name}</div>
-                                        {w.handName && <div className="text-emerald-400 text-[10px] font-bold opacity-80 border-l border-white/10 pl-2">{w.handName}</div>}
-                                    </div>
-                                </div>
-                            ))}
+                        {/* Layer 1: Title */}
+                        <div className="text-yellow-500 text-[10px] md:text-xs font-black mb-4 tracking-[0.3em] text-center uppercase border-b border-yellow-500/10 pb-3 w-full">
+                            🎊 Showdown 🎊
                         </div>
 
-                        <div className="flex gap-2">
-                            <button onClick={onExit} className="flex-1 py-3.5 bg-white/5 text-white border border-white/10 rounded-2xl font-black text-[10px] hover:bg-white/10 transition-all active:scale-95 uppercase tracking-widest">
+                        {/* Layer 2: Winner Info (Vertical) */}
+                        <div className="flex flex-col items-center mb-4">
+                            <span className="text-[10px] text-yellow-500/60 font-black uppercase tracking-widest mb-1">Winner</span>
+                            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-yellow-500/20 to-black border border-yellow-500/30 flex items-center justify-center text-xl mb-1 shadow-inner">👤</div>
+                            <div className="text-white font-black text-sm md:text-base tracking-tight">{gameState.players.find(p => p.id === gameState.winners[0]?.playerId)?.name}</div>
+                        </div>
+
+                        {/* Layer 3: Best Hand Cards & Name */}
+                        <div className="flex flex-col items-center mb-4 w-full bg-white/5 py-4 rounded-2xl border border-white/5">
+                            <div className="flex justify-center -space-x-5 mb-3 px-4">
+                                {gameState.winners[0]?.cards?.map((c, i) => (
+                                    <div key={i} className="transform scale-50 md:scale-75 origin-center filter drop-shadow-xl hover:-translate-y-2 transition-transform">
+                                        <Card card={c} />
+                                    </div>
+                                ))}
+                            </div>
+                            {gameState.winners[0]?.handName && (
+                                <div className="text-emerald-400 text-[10px] md:text-xs font-black bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20">
+                                    ( {gameState.winners[0].handName} )
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Layer 4: Amount */}
+                        <div className="text-yellow-400 font-black text-2xl md:text-3xl tracking-tighter mb-6 drop-shadow-[0_0_15px_rgba(234,179,8,0.4)]">
+                            + {gameState.winners[0]?.amount.toLocaleString()} 💰
+                        </div>
+
+                        {/* Layer 5: Symmetrical Buttons */}
+                        <div className="flex gap-2 w-full">
+                            <button
+                                onClick={onExit}
+                                className="flex-1 py-3 bg-white/5 text-white border border-white/10 rounded-2xl font-black text-[10px] hover:bg-white/20 transition-all active:scale-95 uppercase tracking-widest"
+                            >
                                 Exit
                             </button>
-                            <button onClick={onNextGame} disabled={!isHost} className={`flex-1 py-3.5 rounded-2xl font-black text-[10px] transition-all tracking-widest ${isHost ? 'bg-yellow-500 text-black active:scale-95 shadow-lg shadow-yellow-500/20' : 'bg-white/5 text-white/20 cursor-not-allowed'}`}>
+                            <button
+                                onClick={onNextGame}
+                                disabled={!isHost}
+                                className={`flex-1 py-3 rounded-2xl font-black text-[10px] transition-all tracking-widest ${isHost ? 'bg-yellow-500 text-black active:scale-95 shadow-lg shadow-yellow-500/20' : 'bg-white/5 text-white/20 cursor-not-allowed'}`}
+                            >
                                 {isHost ? "NEXT" : "WAIT"}
                             </button>
                         </div>
