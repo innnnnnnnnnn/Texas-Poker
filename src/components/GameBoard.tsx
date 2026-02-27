@@ -5,6 +5,8 @@ import { GameState, Card as CardType, Player } from '../logic/types';
 import Card from './Card';
 import { Socket } from 'socket.io-client';
 import { useAudio } from '../hooks/useAudio';
+import confetti from 'canvas-confetti';
+import { useRouter } from 'next/navigation';
 
 interface GameBoardProps {
     initialGameState: GameState;
@@ -17,22 +19,52 @@ interface GameBoardProps {
 }
 
 const GameBoard: React.FC<GameBoardProps> = ({ initialGameState, playerIndex, socket, roomId, onExit, onNextGame, isHost }) => {
+    const router = useRouter();
     const [gameState, setGameState] = useState<GameState>(initialGameState);
     const [error, setError] = useState<string | null>(null);
     const [raiseAmount, setRaiseAmount] = useState<number>(initialGameState.bigBlind * 2);
+    const [viewFocusIndex, setViewFocusIndex] = useState<number>(playerIndex !== -1 ? playerIndex : 0);
+    const [showTournamentVictory, setShowTournamentVictory] = useState(false);
+    const [tournamentWinnerName, setTournamentWinnerName] = useState("");
+    const [careerStats, setCareerStats] = useState({
+        matchWins: 0,
+        totalMatches: 0,
+        handWins: 0,
+        totalHands: 0
+    });
+    const [sessionStats, setSessionStats] = useState({
+        wins: 0,
+        total: 0
+    });
     const { playSound } = useAudio();
 
     useEffect(() => {
+        // Load Career Stats
+        const saved = localStorage.getItem('poker_career_stats');
+        if (saved) setCareerStats(JSON.parse(saved));
+
         socket.on("state_update", (state: GameState) => {
+            const prevState = gameState;
             setGameState(state);
             setError(null);
-            if (state.isFinished) playSound('win');
-            else playSound('play');
+
+            // Track hand results for session stats
+            if (!prevState.isFinished && state.isFinished) {
+                const isWinner = state.winners.some(w => w.playerId === gameState.players[playerIndex]?.id);
+                setSessionStats(prev => ({
+                    wins: prev.wins + (isWinner ? 1 : 0),
+                    total: prev.total + 1
+                }));
+                playSound('win');
+            } else {
+                playSound('play');
+            }
         });
 
         socket.on("game_start", (data: { state: GameState, playerIndex: number }) => {
             setGameState(data.state);
             setError(null);
+            setShowTournamentVictory(false);
             playSound('deal');
         });
 
@@ -41,25 +73,67 @@ const GameBoard: React.FC<GameBoardProps> = ({ initialGameState, playerIndex, so
             playSound('error');
         });
 
+        socket.on("force_leave", (reason: string) => {
+            alert(reason);
+            router.push('/');
+        });
+
+        socket.on("tournament_winner", (data: { winner: string }) => {
+            setTournamentWinnerName(data.winner);
+            setShowTournamentVictory(true);
+
+            if (data.winner === (gameState.players[playerIndex]?.name)) {
+                // Update career stats
+                const newStats = {
+                    ...careerStats,
+                    matchWins: careerStats.matchWins + 1,
+                    totalMatches: careerStats.totalMatches + 1,
+                    handWins: careerStats.handWins + sessionStats.wins,
+                    totalHands: careerStats.totalHands + sessionStats.total
+                };
+                setCareerStats(newStats);
+                localStorage.setItem('poker_career_stats', JSON.stringify(newStats));
+
+                // Fire confetti!
+                confetti({
+                    particleCount: 150,
+                    spread: 70,
+                    origin: { y: 0.6 }
+                });
+            } else {
+                // Just update totals
+                const newStats = {
+                    ...careerStats,
+                    totalMatches: careerStats.totalMatches + 1,
+                    handWins: careerStats.handWins + sessionStats.wins,
+                    totalHands: careerStats.totalHands + sessionStats.total
+                };
+                setCareerStats(newStats);
+                localStorage.setItem('poker_career_stats', JSON.stringify(newStats));
+            }
+        });
+
         return () => {
             socket.off("state_update");
             socket.off("game_start");
             socket.off("error");
+            socket.off("force_leave");
+            socket.off("tournament_winner");
         };
-    }, [socket, playerIndex, playSound, roomId]);
+    }, [socket, playerIndex, playSound, roomId, gameState, sessionStats, careerStats, router]);
 
     const isMyTurn = gameState.currentPlayerIndex === playerIndex && !gameState.isFinished;
-    const me = gameState.players[playerIndex];
+    const me = gameState.players[playerIndex] || { chips: 0, currentBet: 0, name: 'Spectator', isFolded: true, hand: [] };
 
     // Mechanism: Smart Default Raise Amount
     useEffect(() => {
-        if (isMyTurn) {
+        if (isMyTurn && me) {
             const minLegalRaise = gameState.currentMaxBet + gameState.bigBlind;
             const maxPossible = me.chips + me.currentBet;
             // Set default to minimum legal, but cap it at total possible (All-in)
             setRaiseAmount(Math.min(minLegalRaise, maxPossible));
         }
-    }, [isMyTurn, gameState.currentMaxBet, me.chips, me.currentBet, gameState.bigBlind]);
+    }, [isMyTurn, gameState.currentMaxBet, me?.chips, me?.currentBet, gameState.bigBlind, me]);
 
     const handleAction = (action: string, amount: number = 0) => {
         socket.emit("poker_action", { roomId, action, amount });
@@ -68,9 +142,9 @@ const GameBoard: React.FC<GameBoardProps> = ({ initialGameState, playerIndex, so
     // Fix: seat positions for 8 players
     // Seat 0 is always the current player
     const getSeatPosition = (index: number) => {
-        const relativeIndex = (index - playerIndex + 8) % 8;
+        const relativeIndex = (index - viewFocusIndex + 8) % 8;
         const positions = [
-            { bottom: '16%', left: '50%', transform: 'translateX(-50%)' },          // Seat 0 (Me)
+            { bottom: '16%', left: '50%', transform: 'translateX(-50%)' },          // Seat 0 (Focus/Me)
             { bottom: '6%', left: '5%', transform: 'none' },                        // Seat 1 (Downstream 1)
             { bottom: '28%', left: '2%', transform: 'none' },                       // Seat 2 (Downstream 2)
             { top: '12%', left: '5%', transform: 'none' },                         // Seat 3 (Downstream 3)
@@ -135,8 +209,9 @@ const GameBoard: React.FC<GameBoardProps> = ({ initialGameState, playerIndex, so
                 return (
                     <div
                         key={p.id}
-                        className="absolute transition-all duration-500 z-20"
+                        className="absolute transition-all duration-500 z-20 cursor-pointer hover:brightness-110"
                         style={pos}
+                        onClick={() => setViewFocusIndex(idx)}
                     >
                         <div className={`relative flex flex-col items-center ${p.isFolded ? 'opacity-40 scale-90 grayscale' : 'scale-100'}`}>
                             {/* Role Indicator (D, SB, BB) */}
@@ -150,15 +225,17 @@ const GameBoard: React.FC<GameBoardProps> = ({ initialGameState, playerIndex, so
                             <div className={`
                                 w-24 md:w-32 bg-black/80 backdrop-blur-md rounded-2xl p-1.5 border-2 transition-all shadow-2xl flex flex-col items-stretch
                                 ${isCurrent ? 'border-yellow-400 ring-4 ring-yellow-400/20 shadow-yellow-500/20' : 'border-white/10'}
+                                ${idx === viewFocusIndex ? 'shadow-[0_0_20px_rgba(59,130,246,0.3)] border-blue-500/50' : ''}
                             `}>
                                 {/* Layer 1: Name (Top Center) */}
-                                <div className="text-white text-[10px] md:text-xs font-bold truncate text-center mb-1 pb-1 border-b border-white/5">
+                                <div className="text-white text-[10px] md:text-xs font-bold truncate text-center mb-1 pb-1 border-b border-white/5 flex items-center justify-center gap-1">
+                                    {idx === viewFocusIndex && <span className="text-[8px] animate-pulse">👁️</span>}
                                     {p.name}
                                 </div>
 
                                 {/* Layer 2: Avatar (Left) & Chips (Right) */}
                                 <div className="flex justify-between items-center mb-1 px-0.5">
-                                    <div className="w-5 h-5 md:w-6 md:h-6 rounded-full bg-gradient-to-br from-gray-700 to-black border border-white/10 flex items-center justify-center text-[10px]">👤</div>
+                                    <div className="w-5 h-5 md:w-6 md:h-6 rounded-full bg-gradient-to-br from-gray-700 to-black border border-white/10 flex items-center justify-center text-[10px]">{p.isHuman ? '👤' : '🤖'}</div>
                                     <div className="text-yellow-500 text-[10px] font-black tracking-tighter">
                                         💰{p.chips.toLocaleString()}
                                     </div>
@@ -176,10 +253,10 @@ const GameBoard: React.FC<GameBoardProps> = ({ initialGameState, playerIndex, so
                                 </div>
                             </div>
 
-                            {/* Cards for other players (reveal on game finish) */}
+                            {/* Cards for other players (reveal on game finish or if spectating/masked) */}
                             {!isMe && !p.isFolded && (
                                 <div className="flex -space-x-6 mt-1 translate-y-[-4px]">
-                                    {gameState.isFinished ? (
+                                    {p.hand && p.hand.length > 0 ? (
                                         p.hand.map((c, i) => <Card key={i} card={c} className="scale-40 origin-top shadow-xl" />)
                                     ) : (
                                         <>
@@ -197,33 +274,39 @@ const GameBoard: React.FC<GameBoardProps> = ({ initialGameState, playerIndex, so
             {/* My Dedicated Hand & Info Area (Bottom) - Cards on Top! */}
             <div className="fixed bottom-0 left-0 right-0 h-32 md:h-40 z-[150] bg-gradient-to-t from-black via-black/80 to-transparent flex items-center justify-center px-4 pointer-events-none">
                 <div className="flex items-center space-x-3 mb-2 pointer-events-auto">
-                    {/* User Profile Info */}
+                    {/* Focus Profile Info */}
                     <div className="flex flex-col items-center">
                         <div className={`
                             w-[68px] h-[68px] md:w-[76px] md:h-[76px] rounded-full flex items-center justify-center text-3xl md:text-4xl shadow-2xl border-4 transition-all
-                            ${gameState.currentPlayerIndex === playerIndex ? 'bg-yellow-500 border-yellow-400 scale-110' : 'bg-gray-800 border-white/10'}
+                            ${gameState.currentPlayerIndex === viewFocusIndex ? 'bg-yellow-500 border-yellow-400 scale-110' : 'bg-gray-800 border-white/10'}
                         `}>
-                            👤
+                            {gameState.players[viewFocusIndex]?.isHuman ? '👤' : '🤖'}
                         </div>
                         <div className="mt-1 text-center">
-                            <div className="text-yellow-500 font-black text-xs md:text-sm">💰 {me.chips.toLocaleString()}</div>
+                            <div className="text-yellow-500 font-black text-xs md:text-sm">💰 {gameState.players[viewFocusIndex]?.chips.toLocaleString()}</div>
                         </div>
                     </div>
 
-                    {/* User Cards */}
+                    {/* Focus Cards */}
                     <div className="flex -space-x-10 md:-space-x-12 translate-y-[-4px]">
-                        {!me.isFolded && me.hand.map((c, i) => (
+                        {!gameState.players[viewFocusIndex]?.isFolded && (gameState.players[viewFocusIndex]?.hand || []).map((c, i) => (
                             <Card
                                 key={i}
                                 card={c}
                                 className={`
                                     shadow-2xl transition-all duration-300
-                                    ${gameState.currentPlayerIndex === playerIndex ? 'scale-110 md:scale-125 z-10' : 'scale-100 md:scale-110'}
+                                    ${gameState.currentPlayerIndex === viewFocusIndex ? 'scale-110 md:scale-125 z-10' : 'scale-100 md:scale-110'}
                                     hover:translate-y-[-10px]
                                 `}
                             />
                         ))}
-                        {me.isFolded && <div className="text-red-500 font-black text-2xl uppercase tracking-tighter opacity-50">FOLDED</div>}
+                        {gameState.players[viewFocusIndex]?.isFolded && <div className="text-red-500 font-black text-2xl uppercase tracking-tighter opacity-50">FOLDED</div>}
+                        {!gameState.players[viewFocusIndex]?.isFolded && (!gameState.players[viewFocusIndex]?.hand || gameState.players[viewFocusIndex].hand.length === 0) && (
+                            <div className="flex -space-x-8">
+                                <Card isHidden className="scale-100 md:scale-110" />
+                                <Card isHidden className="scale-100 md:scale-110" />
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>
@@ -316,60 +399,91 @@ const GameBoard: React.FC<GameBoardProps> = ({ initialGameState, playerIndex, so
             </button>
 
             {/* Result Overlay (Same Pos as Action Bar) */}
-            {/* 🏆 Result Overlay (Strict 60% Width - Atomic Tightly-Packed Layout) */}
-            {gameState.isFinished && (
-                <div className="fixed bottom-32 md:bottom-36 left-1/2 -translate-x-1/2 z-[500] flex flex-col items-center w-[60vw] px-4">
-                    <div className="w-full bg-black/95 backdrop-blur-3xl rounded-3xl p-5 border-2 border-yellow-500/50 shadow-[0_30px_80px_rgba(0,0,0,1)] flex flex-col items-center">
-
-                        {/* Layer 1: Title */}
-                        <div className="text-yellow-500 text-[10px] md:text-xs font-black tracking-[0.3em] text-center uppercase border-b border-yellow-500/10 pb-1.5 w-full mb-1">
-                            🎊 Showdown 🎊
-                        </div>
-
-                        {/* Layer 2: Winner Info (Avatar + Name) */}
-                        <div className="flex flex-col items-center mb-0.5">
-                            <div className="w-8 h-8 rounded-full bg-yellow-500/10 border border-yellow-500/20 flex items-center justify-center text-xl shadow-inner mb-0.5">👤</div>
-                            <div className="text-white font-black text-xs md:text-sm tracking-tight truncate max-w-[150px]">
-                                {gameState.players.find(p => p.id === gameState.winners[0]?.playerId)?.name}
+            {/* Tournament Victory Overlay */}
+            {showTournamentVictory && (
+                <div className="fixed inset-0 z-[1000] bg-black/95 backdrop-blur-3xl flex items-center justify-center p-6 animate-in fade-in zoom-in duration-500 overflow-y-auto">
+                    <div className="max-w-md w-full flex flex-col items-center">
+                        {/* 🏆 Trophy */}
+                        <div className="relative mb-6">
+                            <div className="absolute inset-0 bg-yellow-500/20 blur-3xl rounded-full scale-150 animate-pulse" />
+                            <div className="text-8xl md:text-9xl drop-shadow-[0_0_50px_rgba(234,179,8,0.8)] relative z-10 animate-bounce">
+                                🏆
                             </div>
                         </div>
 
-                        {/* Layer 3: Amount */}
-                        <div className="text-yellow-400 font-black text-xl md:text-2xl tracking-tighter drop-shadow-[0_0_10px_rgba(234,179,8,0.4)] mb-3">
-                            + {gameState.winners[0]?.amount.toLocaleString()} 💰
+                        {/* Winner Name */}
+                        <div className="text-center mb-8">
+                            <div className="w-20 h-20 rounded-full bg-yellow-500/10 border-2 border-yellow-500/30 flex items-center justify-center text-4xl mx-auto mb-3 shadow-inner">👤</div>
+                            <h2 className="text-white font-black text-2xl md:text-3xl tracking-tight mb-2">
+                                恭喜！<span className="text-yellow-500">{tournamentWinnerName}</span> 獲得最後勝利！
+                            </h2>
                         </div>
 
-                        {/* Layer 4: Cards & Hand Name (Stable Small Gap) */}
-                        <div className="flex flex-col items-center w-full mb-3">
-                            <div className="flex justify-center -space-x-6 mb-0">
-                                {gameState.winners[0]?.cards?.map((c, i) => (
-                                    <div key={i} className="transform scale-50 md:scale-65 origin-top filter drop-shadow-2xl">
-                                        <Card card={c} />
+                        {/* Stats Cards */}
+                        <div className="grid grid-cols-1 gap-4 w-full mb-10">
+                            {/* Match Stats */}
+                            <div className="bg-white/5 border border-white/10 rounded-3xl p-5 backdrop-blur-md">
+                                <div className="text-[10px] text-white/40 font-black uppercase tracking-widest mb-4 border-b border-white/5 pb-2">本場戰報 (Current Match)</div>
+                                <div className="flex justify-around items-end">
+                                    <div className="text-center">
+                                        <div className="text-white font-black text-2xl leading-none">{sessionStats.wins}</div>
+                                        <div className="text-[9px] text-white/30 uppercase mt-2">勝局數</div>
                                     </div>
-                                ))}
-                            </div>
-                            {gameState.winners[0]?.handName && (
-                                <div className="text-emerald-400 text-[9px] md:text-[10px] font-black opacity-90 mt-[-28px] leading-none">
-                                    ( {gameState.winners[0].handName} )
+                                    <div className="w-[1px] h-8 bg-white/10" />
+                                    <div className="text-center">
+                                        <div className="text-yellow-500 font-black text-2xl leading-none">
+                                            {sessionStats.total > 0 ? Math.round((sessionStats.wins / sessionStats.total) * 100) : 0}%
+                                        </div>
+                                        <div className="text-[9px] text-white/30 uppercase mt-2">局勝率</div>
+                                    </div>
                                 </div>
-                            )}
+                            </div>
+
+                            {/* Career Stats */}
+                            <div className="bg-yellow-500/5 border border-yellow-500/10 rounded-3xl p-5 backdrop-blur-md shadow-inner">
+                                <div className="text-[10px] text-yellow-500/40 font-black uppercase tracking-widest mb-4 border-b border-yellow-500/5 pb-2">生涯榮譽 (Lifetime Career)</div>
+                                <div className="grid grid-cols-2 gap-6">
+                                    <div className="space-y-4">
+                                        <div>
+                                            <div className="text-white font-bold text-lg leading-none">{careerStats.matchWins}</div>
+                                            <div className="text-[8px] text-white/30 uppercase mt-1 tracking-tighter">總冠軍數</div>
+                                        </div>
+                                        <div>
+                                            <div className="text-yellow-500 font-bold text-lg leading-none">
+                                                {careerStats.totalMatches > 0 ? Math.round((careerStats.matchWins / careerStats.totalMatches) * 100) : 0}%
+                                            </div>
+                                            <div className="text-[8px] text-white/30 uppercase mt-1 tracking-tighter">比賽勝率</div>
+                                        </div>
+                                    </div>
+                                    <div className="space-y-4">
+                                        <div>
+                                            <div className="text-white font-bold text-lg leading-none">{careerStats.handWins + sessionStats.wins}</div>
+                                            <div className="text-[8px] text-white/30 uppercase mt-1 tracking-tighter">總勝局數</div>
+                                        </div>
+                                        <div>
+                                            <div className="text-yellow-500 font-bold text-lg leading-none">
+                                                {(careerStats.totalHands + sessionStats.total) > 0 ? Math.round(((careerStats.handWins + sessionStats.wins) / (careerStats.totalHands + sessionStats.total)) * 100) : 0}%
+                                            </div>
+                                            <div className="text-[8px] text-white/30 uppercase mt-1 tracking-tighter">總局勝率</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
 
-
-                        {/* Layer 5: Symmetrical Buttons */}
-                        <div className="flex gap-2 w-full">
+                        {/* Buttons */}
+                        <div className="flex flex-col gap-3 w-full">
                             <button
-                                onClick={onExit}
-                                className="flex-1 py-3 bg-white/5 text-white border border-white/10 rounded-2xl font-black text-[10px] hover:bg-white/20 transition-all active:scale-95 uppercase tracking-widest"
+                                onClick={() => router.push('/')}
+                                className="w-full py-4 bg-yellow-500 hover:bg-yellow-400 text-black font-black rounded-2xl shadow-xl shadow-yellow-500/20 transition-all active:scale-95 uppercase tracking-widest"
                             >
-                                Exit
+                                再次挑戰 (Next Match)
                             </button>
                             <button
-                                onClick={onNextGame}
-                                disabled={!isHost}
-                                className={`flex-1 py-3 rounded-2xl font-black text-[10px] transition-all tracking-widest ${isHost ? 'bg-yellow-500 text-black active:scale-95 shadow-lg shadow-yellow-500/20' : 'bg-white/5 text-white/20 cursor-not-allowed'}`}
+                                onClick={() => router.push('/')}
+                                className="w-full py-4 bg-white/5 hover:bg-white/10 text-white font-black rounded-2xl border border-white/10 transition-all active:scale-95 uppercase tracking-widest text-xs"
                             >
-                                {isHost ? "NEXT" : "WAIT"}
+                                回到大廳 (Lobby)
                             </button>
                         </div>
                     </div>

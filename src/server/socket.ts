@@ -36,6 +36,36 @@ const DIFFICULTY_MAP = {
     'Master': '大師'
 };
 
+const broadcastState = (roomId: string) => {
+    const room = rooms[roomId];
+    if (!room || !room.state) return;
+
+    room.players.forEach((p) => {
+        if (!p.socketId) return;
+
+        // Spectators see everything
+        const isSpectator = !room.state?.players.some(stateP => stateP.name === p.name);
+
+        if (isSpectator) {
+            io.to(p.socketId).emit("state_update", room.state);
+            return;
+        }
+
+        // Players see only their own cards
+        const playerIdx = room.state?.players.findIndex(stateP => stateP.name === p.name);
+
+        const maskedState = {
+            ...room.state,
+            players: room.state?.players.map((sp, idx) => ({
+                ...sp,
+                hand: (idx === playerIdx || room.state?.isFinished || room.state?.phase === 'Showdown') ? sp.hand : []
+            }))
+        };
+
+        io.to(p.socketId).emit("state_update", maskedState);
+    });
+};
+
 io.on("connection", (socket) => {
     // Mechanism C: Keep-alive ping handler
     socket.on("ping", () => {
@@ -114,10 +144,35 @@ io.on("connection", (socket) => {
     socket.on("start_game", (data: { roomId: string }) => {
         const room = rooms[data.roomId];
         if (!room) return;
-        if (room.state && !room.state.isFinished) return;
+        // Mechanism: Chip Inheritance & Bankruptcy removal
+        let previousPlayers = room.state?.players || [];
 
-        const player = room.players.find(p => p.socketId === socket.id);
-        if (!player || !player.isHost) return;
+        // 1. Identify bankrupt players (less than big blind)
+        const bankruptNames = previousPlayers
+            .filter(p => p.chips < 20) // Assuming BB is 20
+            .map(p => p.name);
+
+        // 2. Remove bankrupt players from room.players and notify human players
+        const originalPlayers = [...room.players];
+        room.players = room.players.filter(p => !bankruptNames.includes(p.name));
+
+        originalPlayers.forEach(p => {
+            if (bankruptNames.includes(p.name) && p.socketId) {
+                io.to(p.socketId).emit("force_leave", "籌碼不足，遺憾離場");
+            }
+        });
+
+        // 3. Tournament Winner Detection
+        if (room.players.length <= 1) {
+            io.to(data.roomId).emit("tournament_winner", {
+                winner: room.players[0]?.name || "None",
+                stats: {
+                    matchWins: 1 // This will be handled on client side for career stats
+                }
+            });
+            room.state = null; // Reset
+            return;
+        }
 
         // Fill with AI if necessary up to maxPlayers
         if (room.players.length < room.maxPlayers) {
@@ -138,17 +193,31 @@ io.on("connection", (socket) => {
             }
         }
 
-        const playerInfos = room.players.map((p) => ({
-            name: p.name,
-            isHuman: !p.isAI,
-            chips: 1000
-        }));
+        const playerInfos = room.players.map((p) => {
+            const prev = previousPlayers.find(prevP => prevP.name === p.name);
+            return {
+                name: p.name,
+                isHuman: !p.isAI,
+                chips: prev && prev.chips >= 20 ? prev.chips : 1000
+            };
+        });
+
         room.state = initializeGame(playerInfos);
 
         room.players.forEach((p, index) => {
             if (p.socketId) {
+                // For initial game_start, we send the masked state
+                const playerIdx = index;
+                const maskedState = {
+                    ...room.state,
+                    players: room.state?.players.map((sp, idx) => ({
+                        ...sp,
+                        hand: idx === playerIdx ? sp.hand : []
+                    }))
+                };
+
                 io.to(p.socketId).emit("game_start", {
-                    state: room.state,
+                    state: maskedState,
                     playerIndex: index
                 });
             }
@@ -169,7 +238,7 @@ io.on("connection", (socket) => {
         const result = handleAction(room.state, playerIndex, data.action, data.amount || 0);
         if (typeof result !== "string") {
             room.state = result;
-            io.to(data.roomId).emit("state_update", result);
+            broadcastState(data.roomId);
 
             if (!result.isFinished && !result.players[result.currentPlayerIndex].isHuman) {
                 setTimeout(() => triggerAI(data.roomId), 1000);
@@ -206,7 +275,7 @@ io.on("connection", (socket) => {
         const result = handleAction(room.state, aiIndex, action, amount);
         if (typeof result !== "string") {
             room.state = result;
-            io.to(roomId).emit("state_update", result);
+            broadcastState(roomId);
             if (!result.isFinished && !result.players[result.currentPlayerIndex].isHuman) {
                 setTimeout(() => triggerAI(roomId), 1000);
             }
