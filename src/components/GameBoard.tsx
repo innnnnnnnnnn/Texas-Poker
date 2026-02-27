@@ -425,8 +425,8 @@ const GameBoard: React.FC<GameBoardProps> = ({ initialGameState, playerIndex, so
             {/* 🏆 原子化技術緊湊結算控制區 - 影視化 & 動作條對齊版 */}
             {gameState.isFinished && !showTournamentVictory && (
                 <>
-                    {/* 全桌模糊背景 (Blurred Table Backdrop) */}
-                    <div className="fixed inset-0 z-[190] bg-black/20 backdrop-blur-md animate-in fade-in duration-500" />
+                    {/* 全桌背景 (Table Backdrop) - 移除霧化效果 */}
+                    <div className="fixed inset-0 z-[190] bg-black/10 animate-in fade-in duration-500" />
 
                     {/* 結算控制卡片 - 位置與下注條完全同步 (Positioned like Action Bar) */}
                     <div className="fixed bottom-32 md:bottom-36 left-1/2 -translate-x-1/2 z-[200] flex flex-col items-center w-[90%] md:w-[60%] pointer-events-none px-4">
