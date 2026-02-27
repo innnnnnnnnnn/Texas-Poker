@@ -61,13 +61,13 @@ const GameBoard: React.FC<GameBoardProps> = ({ initialGameState, playerIndex, so
         const relativeIndex = (index - playerIndex + 8) % 8;
         const positions = [
             { bottom: '15%', left: '50%', transform: 'translateX(-50%)' },          // Seat 0 (Me)
-            { bottom: '5%', left: '5%', transform: 'none' },                        // Seat 1 (Downstream 1)
+            { bottom: '8%', left: '5%', transform: 'none' },                        // Seat 1 (Downstream 1)
             { bottom: '28%', left: '2%', transform: 'none' },                       // Seat 2 (Downstream 2)
-            { top: '10%', left: '5%', transform: 'none' },                         // Seat 3 (Downstream 3)
-            { top: '2%', left: '50%', transform: 'translateX(-50%)' },              // Seat 4 (Top Center)
-            { top: '10%', right: '5%', transform: 'none' },                        // Seat 5 (Upstream 3)
+            { top: '12%', left: '5%', transform: 'none' },                         // Seat 3 (Downstream 3)
+            { top: '5%', left: '50%', transform: 'translateX(-50%)' },              // Seat 4 (Top Center)
+            { top: '12%', right: '5%', transform: 'none' },                        // Seat 5 (Upstream 3)
             { bottom: '28%', right: '2%', transform: 'none' },                      // Seat 6 (Upstream 2)
-            { bottom: '5%', right: '5%', transform: 'none' },                       // Seat 7 (Upstream 1)
+            { bottom: '8%', right: '5%', transform: 'none' },                       // Seat 7 (Upstream 1)
         ];
         return positions[relativeIndex];
     };
@@ -96,7 +96,7 @@ const GameBoard: React.FC<GameBoardProps> = ({ initialGameState, playerIndex, so
             </div>
 
             {/* 📊 Phase & street info (Street Info) */}
-            <div className="absolute top-[25%] left-1/2 -translate-x-1/2 z-[140] pointer-events-none text-center">
+            <div className="absolute top-[32%] left-1/2 -translate-x-1/2 z-[140] pointer-events-none text-center">
                 <div className="bg-white/5 border border-white/10 px-6 py-2 rounded-full text-[10px] md:text-xs text-white/80 font-black uppercase tracking-widest backdrop-blur-md shadow-lg whitespace-nowrap min-w-max">
                     {gameState.phase} • {toCall > 0 ? `To Call: ${toCall}` : 'Check or Bet'}
                 </div>
