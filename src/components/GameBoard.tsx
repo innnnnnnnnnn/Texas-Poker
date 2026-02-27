@@ -96,8 +96,8 @@ const GameBoard: React.FC<GameBoardProps> = ({ initialGameState, playerIndex, so
             </div>
 
             {/* 📊 Phase & street info (Street Info) */}
-            <div className="absolute top-[25%] left-1/2 -translate-x-1/2 z-[140] pointer-events-none">
-                <div className="bg-white/5 border border-white/10 px-6 py-2 rounded-full text-[10px] md:text-xs text-white/80 font-black uppercase tracking-widest backdrop-blur-md shadow-lg">
+            <div className="absolute top-[25%] left-1/2 -translate-x-1/2 z-[140] pointer-events-none text-center">
+                <div className="bg-white/5 border border-white/10 px-6 py-2 rounded-full text-[10px] md:text-xs text-white/80 font-black uppercase tracking-widest backdrop-blur-md shadow-lg whitespace-nowrap min-w-max">
                     {gameState.phase} • {toCall > 0 ? `To Call: ${toCall}` : 'Check or Bet'}
                 </div>
             </div>
