@@ -51,6 +51,16 @@ const GameBoard: React.FC<GameBoardProps> = ({ initialGameState, playerIndex, so
     const isMyTurn = gameState.currentPlayerIndex === playerIndex && !gameState.isFinished;
     const me = gameState.players[playerIndex];
 
+    // Mechanism: Smart Default Raise Amount
+    useEffect(() => {
+        if (isMyTurn) {
+            const minLegalRaise = gameState.currentMaxBet + gameState.bigBlind;
+            const maxPossible = me.chips + me.currentBet;
+            // Set default to minimum legal, but cap it at total possible (All-in)
+            setRaiseAmount(Math.min(minLegalRaise, maxPossible));
+        }
+    }, [isMyTurn, gameState.currentMaxBet, me.chips, me.currentBet, gameState.bigBlind]);
+
     const handleAction = (action: string, amount: number = 0) => {
         socket.emit("poker_action", { roomId, action, amount });
     };
@@ -258,8 +268,8 @@ const GameBoard: React.FC<GameBoardProps> = ({ initialGameState, playerIndex, so
                         {/* Primary Interaction Buttons */}
                         <div className="grid grid-cols-3 gap-2">
                             <button
-                                onClick={() => handleAction('Fold')}
-                                className="py-3.5 bg-gray-800 hover:bg-gray-700 text-white font-black rounded-2xl transition-all shadow-lg active:scale-95 border border-white/5"
+                                onClick={() => handleAction("Fold")}
+                                className="py-3.5 bg-red-600 hover:bg-red-700 text-white font-black rounded-2xl shadow-lg transition-transform active:scale-95 text-xs"
                             >
                                 FOLD
                             </button>
@@ -267,7 +277,7 @@ const GameBoard: React.FC<GameBoardProps> = ({ initialGameState, playerIndex, so
                             {toCall <= 0 ? (
                                 <button
                                     onClick={() => handleAction('Check')}
-                                    className="py-3.5 bg-blue-600 hover:bg-blue-500 text-white font-black rounded-2xl transition-all shadow-lg active:scale-95 shadow-blue-500/20 border border-blue-400/50"
+                                    className="py-3.5 bg-blue-600 hover:bg-blue-500 text-white font-black rounded-2xl transition-all shadow-lg active:scale-95 shadow-blue-500/20 border border-blue-400/50 text-xs"
                                 >
                                     CHECK
                                 </button>
@@ -285,7 +295,9 @@ const GameBoard: React.FC<GameBoardProps> = ({ initialGameState, playerIndex, so
                                 onClick={() => handleAction('Raise', raiseAmount)}
                                 className="py-3.5 bg-yellow-500 hover:bg-yellow-400 text-black font-black rounded-2xl transition-all shadow-lg active:scale-95 shadow-yellow-500/20 border-b-4 border-yellow-700 flex flex-col items-center justify-center leading-tight"
                             >
-                                <span className="text-xs">{toCall <= 0 ? 'BET' : 'RAISE'}</span>
+                                <span className="text-xs">
+                                    {raiseAmount >= (me.chips + me.currentBet) ? 'ALL-IN' : (toCall <= 0 ? 'BET' : 'RAISE')}
+                                </span>
                                 <span className="text-[9px] opacity-70">{raiseAmount}</span>
                             </button>
                         </div>
