@@ -304,9 +304,9 @@ const GameBoard: React.FC<GameBoardProps> = ({ initialGameState, playerIndex, so
             </button>
 
             {/* Result Overlay (Same Pos as Action Bar) */}
-            {/* 🏆 Result Overlay (Strict 50% Width 5-Layer Vertical Layout) */}
+            {/* 🏆 Result Overlay (Strict 60% Width 5-Layer Vertical Layout - Pure Content) */}
             {gameState.isFinished && (
-                <div className="fixed bottom-32 md:bottom-36 left-1/2 -translate-x-1/2 z-[500] flex flex-col items-center w-[50vw] px-4">
+                <div className="fixed bottom-32 md:bottom-36 left-1/2 -translate-x-1/2 z-[500] flex flex-col items-center w-[60vw] px-4">
                     <div className="w-full bg-black/90 backdrop-blur-3xl rounded-3xl p-5 border-2 border-yellow-500/50 shadow-[0_30px_70px_rgba(0,0,0,0.9)] flex flex-col items-center">
 
                         {/* Layer 1: Title */}
@@ -315,14 +315,14 @@ const GameBoard: React.FC<GameBoardProps> = ({ initialGameState, playerIndex, so
                         </div>
 
                         {/* Layer 2: Winner Info (Vertical) */}
-                        <div className="flex flex-col items-center mb-4">
+                        <div className="flex flex-col items-center mb-6">
                             <span className="text-[10px] text-yellow-500/60 font-black uppercase tracking-widest mb-1">Winner</span>
                             <div className="w-10 h-10 rounded-full bg-gradient-to-br from-yellow-500/20 to-black border border-yellow-500/30 flex items-center justify-center text-xl mb-1 shadow-inner">👤</div>
                             <div className="text-white font-black text-sm md:text-base tracking-tight">{gameState.players.find(p => p.id === gameState.winners[0]?.playerId)?.name}</div>
                         </div>
 
-                        {/* Layer 3: Best Hand Cards & Name */}
-                        <div className="flex flex-col items-center mb-4 w-full bg-white/5 py-4 rounded-2xl border border-white/5">
+                        {/* Layer 3: Best Hand Cards & Name (Pure Content - No Frame) */}
+                        <div className="flex flex-col items-center mb-6 w-full py-2">
                             <div className="flex justify-center -space-x-5 mb-3 px-4">
                                 {gameState.winners[0]?.cards?.map((c, i) => (
                                     <div key={i} className="transform scale-50 md:scale-75 origin-center filter drop-shadow-xl hover:-translate-y-2 transition-transform">
@@ -331,14 +331,14 @@ const GameBoard: React.FC<GameBoardProps> = ({ initialGameState, playerIndex, so
                                 ))}
                             </div>
                             {gameState.winners[0]?.handName && (
-                                <div className="text-emerald-400 text-[10px] md:text-xs font-black bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20">
+                                <div className="text-emerald-400 text-[10px] md:text-xs font-black">
                                     ( {gameState.winners[0].handName} )
                                 </div>
                             )}
                         </div>
 
                         {/* Layer 4: Amount */}
-                        <div className="text-yellow-400 font-black text-2xl md:text-3xl tracking-tighter mb-6 drop-shadow-[0_0_15px_rgba(234,179,8,0.4)]">
+                        <div className="text-yellow-400 font-black text-2xl md:text-3xl tracking-tighter mb-8 drop-shadow-[0_0_15px_rgba(234,179,8,0.4)]">
                             + {gameState.winners[0]?.amount.toLocaleString()} 💰
                         </div>
 
