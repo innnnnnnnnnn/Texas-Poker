@@ -38,7 +38,14 @@ const RoomContent = () => {
         if (!myId || !roomId) return;
 
         console.log("[Room] Effect Triggered: Joining...");
-        const wsUrl = process.env.NEXT_PUBLIC_WS_URL || "http://localhost:3002";
+        let wsUrl = process.env.NEXT_PUBLIC_WS_URL || "http://localhost:3002";
+
+        // 如果 wsUrl 看起來像 LIFF ID (純數字開頭)，則回退到 localhost 並顯示警報
+        if (wsUrl.includes("-") && !wsUrl.startsWith("http")) {
+            console.error("[Room] Invalid WS_URL detected (possibly LIFF ID swapped):", wsUrl);
+            wsUrl = "http://localhost:3002";
+            setConnectionError("伺服器網址設定錯誤 (可能與 LIFF ID 填反了)，請檢查 GitHub Secrets。");
+        }
 
         if (!socket || !socket.connected) {
             socket = io(wsUrl);
