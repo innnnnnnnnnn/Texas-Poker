@@ -105,6 +105,12 @@ const RoomContent = () => {
             setGameState(null);
         });
 
+        socket.on("force_leave", (reason: string) => {
+            console.log("[Room] Forced to leave:", reason);
+            alert(reason);
+            window.location.href = "/Texas-Poker/";
+        });
+
         // Mechanism C: Keep-alive ping every 5 minutes
         const pingInterval = setInterval(() => {
             if (socket && socket.connected) {

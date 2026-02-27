@@ -90,8 +90,9 @@ const GameBoard: React.FC<GameBoardProps> = ({ initialGameState, playerIndex, so
         });
 
         socket.on("force_leave", (reason: string) => {
+            console.log("[GameBoard] Forced to leave:", reason);
             alert(reason);
-            router.push('/');
+            window.location.href = "/Texas-Poker/";
         });
 
         socket.on("tournament_winner", (data: { winner: string }) => {
@@ -125,9 +126,7 @@ const GameBoard: React.FC<GameBoardProps> = ({ initialGameState, playerIndex, so
                     origin: { y: 0.6 }
                 });
             } else {
-                // If I'm not the winner but received this, just redirect or show results
-                // Usually force_leave handled non-winners, but for spectators etc:
-                router.push('/');
+                window.location.href = "/Texas-Poker/";
             }
         });
 
@@ -576,7 +575,7 @@ const GameBoard: React.FC<GameBoardProps> = ({ initialGameState, playerIndex, so
                         {/* Buttons */}
                         <div className="flex flex-col gap-4 w-full">
                             <button
-                                onClick={() => router.push('/')}
+                                onClick={() => window.location.href = "/Texas-Poker/"}
                                 className="w-full py-5 bg-yellow-500 hover:bg-yellow-400 text-black font-black rounded-[20px] shadow-[0_6px_0_rgb(180,100,0)] transition-all active:translate-y-1 uppercase tracking-widest text-sm"
                             >
                                 回到大廳 / 再玩一場 (建立新局)
