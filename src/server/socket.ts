@@ -156,6 +156,15 @@ io.on("connection", (socket) => {
     socket.on("start_game", (data: { roomId: string }) => {
         const room = rooms[data.roomId];
         if (!room) return;
+
+        console.log(`[Socket] Starting game for room ${data.roomId}. Players: ${room.players.length}`);
+
+        if (room.players.length < 2 && room.maxPlayers < 2) {
+            console.log(`[Socket] Game start failed: not enough players`);
+            socket.emit("error", "至少需要 2 名玩家（包含 AI）才能開始遊戲");
+            return;
+        }
+
         // Mechanism: Chip Inheritance & Bankruptcy removal
         let previousPlayers = room.state?.players || [];
 
@@ -179,7 +188,7 @@ io.on("connection", (socket) => {
             io.to(data.roomId).emit("tournament_winner", {
                 winner: room.players[0]?.name || "None",
                 stats: {
-                    matchWins: 1 // This will be handled on client side for career stats
+                    matchWins: 1
                 }
             });
             room.state = null; // Reset

@@ -19,6 +19,7 @@ interface GameBoardProps {
 }
 
 const GameBoard: React.FC<GameBoardProps> = ({ initialGameState, playerIndex, socket, roomId, onExit, onNextGame, isHost }) => {
+    console.log("[GameBoard] Mounting... PlayerIndex:", playerIndex);
     const router = useRouter();
     const [gameState, setGameState] = useState<GameState>(initialGameState);
     const [error, setError] = useState<string | null>(null);
@@ -38,19 +39,33 @@ const GameBoard: React.FC<GameBoardProps> = ({ initialGameState, playerIndex, so
     });
     const { playSound } = useAudio();
 
+    const gameStateRef = React.useRef(gameState);
+    const sessionStatsRef = React.useRef(sessionStats);
+    const careerStatsRef = React.useRef(careerStats);
+
     useEffect(() => {
+        gameStateRef.current = gameState;
+        sessionStatsRef.current = sessionStats;
+        careerStatsRef.current = careerStats;
+    }, [gameState, sessionStats, careerStats]);
+
+    useEffect(() => {
+        console.log("[GameBoard] Setting up socket listeners");
+
         // Load Career Stats
         const saved = localStorage.getItem('poker_career_stats');
         if (saved) setCareerStats(JSON.parse(saved));
 
         socket.on("state_update", (state: GameState) => {
-            const prevState = gameState;
+            console.log("[GameBoard] Socket: state_update");
+            const prevState = gameStateRef.current;
             setGameState(state);
             setError(null);
 
             // Track hand results for session stats
-            if (!prevState.isFinished && state.isFinished) {
-                const isWinner = state.winners.some(w => w.playerId === gameState.players[playerIndex]?.id);
+            if (prevState && !prevState.isFinished && state.isFinished) {
+                const myState = state.players.find(p => p.name === (prevState.players[playerIndex]?.name || ''));
+                const isWinner = state.winners.some(w => w.playerId === myState?.id);
                 setSessionStats(prev => ({
                     wins: prev.wins + (isWinner ? 1 : 0),
                     total: prev.total + 1
@@ -62,6 +77,7 @@ const GameBoard: React.FC<GameBoardProps> = ({ initialGameState, playerIndex, so
         });
 
         socket.on("game_start", (data: { state: GameState, playerIndex: number }) => {
+            console.log("[GameBoard] Socket: game_start", data.playerIndex);
             setGameState(data.state);
             setError(null);
             setShowTournamentVictory(false);
@@ -79,17 +95,22 @@ const GameBoard: React.FC<GameBoardProps> = ({ initialGameState, playerIndex, so
         });
 
         socket.on("tournament_winner", (data: { winner: string }) => {
+            console.log("[GameBoard] Socket: tournament_winner", data.winner);
             setTournamentWinnerName(data.winner);
             setShowTournamentVictory(true);
 
-            if (data.winner === (gameState.players[playerIndex]?.name)) {
+            const currentMeName = gameStateRef.current?.players[playerIndex]?.name;
+            const currentSessionStats = sessionStatsRef.current;
+            const currentCareerStats = careerStatsRef.current;
+
+            if (data.winner === currentMeName) {
                 // Update career stats
                 const newStats = {
-                    ...careerStats,
-                    matchWins: careerStats.matchWins + 1,
-                    totalMatches: careerStats.totalMatches + 1,
-                    handWins: careerStats.handWins + sessionStats.wins,
-                    totalHands: careerStats.totalHands + sessionStats.total
+                    ...currentCareerStats,
+                    matchWins: currentCareerStats.matchWins + 1,
+                    totalMatches: currentCareerStats.totalMatches + 1,
+                    handWins: currentCareerStats.handWins + currentSessionStats.wins,
+                    totalHands: currentCareerStats.totalHands + currentSessionStats.total
                 };
                 setCareerStats(newStats);
                 localStorage.setItem('poker_career_stats', JSON.stringify(newStats));
@@ -103,10 +124,10 @@ const GameBoard: React.FC<GameBoardProps> = ({ initialGameState, playerIndex, so
             } else {
                 // Just update totals
                 const newStats = {
-                    ...careerStats,
-                    totalMatches: careerStats.totalMatches + 1,
-                    handWins: careerStats.handWins + sessionStats.wins,
-                    totalHands: careerStats.totalHands + sessionStats.total
+                    ...currentCareerStats,
+                    totalMatches: currentCareerStats.totalMatches + 1,
+                    handWins: currentCareerStats.handWins + currentSessionStats.wins,
+                    totalHands: currentCareerStats.totalHands + currentSessionStats.total
                 };
                 setCareerStats(newStats);
                 localStorage.setItem('poker_career_stats', JSON.stringify(newStats));
@@ -114,13 +135,14 @@ const GameBoard: React.FC<GameBoardProps> = ({ initialGameState, playerIndex, so
         });
 
         return () => {
+            console.log("[GameBoard] Cleaning up socket listeners");
             socket.off("state_update");
             socket.off("game_start");
             socket.off("error");
             socket.off("force_leave");
             socket.off("tournament_winner");
         };
-    }, [socket, playerIndex, playSound, roomId, gameState, sessionStats, careerStats, router]);
+    }, [socket, playerIndex, playSound, router]);
 
     const isMyTurn = gameState.currentPlayerIndex === playerIndex && !gameState.isFinished;
     const me = (playerIndex !== -1 && gameState.players[playerIndex])

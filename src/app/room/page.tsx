@@ -89,7 +89,15 @@ const RoomContent = () => {
         });
 
         socket.on("state_update", (state: GameState) => {
+            console.log("[Room] Received state_update");
             setGameState(state);
+        });
+
+        socket.on("tournament_winner", (data: { winner: string }) => {
+            console.log("[Room] Tournament Winner:", data.winner);
+            // If GameBoard is not already showing the victory screen, alert and reset
+            alert(`比賽結束！冠軍是：${data.winner}`);
+            setGameState(null);
         });
 
         // Mechanism C: Keep-alive ping every 5 minutes
