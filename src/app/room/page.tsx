@@ -161,7 +161,7 @@ const RoomContent = () => {
                 playerIndex={playerIndex}
                 socket={socket}
                 roomId={roomId as string}
-                onExit={() => router.push("/lobby")}
+                onExit={() => window.location.href = "/Texas-Poker/lobby/"}
                 onNextGame={startGame}
                 isHost={currentIsHost}
             />
@@ -169,7 +169,7 @@ const RoomContent = () => {
     }
 
     return (
-        <div className="h-screen bg-[#0a4d2e] flex flex-col items-center justify-center py-4 px-4 md:p-8 overflow-hidden">
+        <div className="min-h-screen bg-black flex flex-col items-center justify-center p-4">
             <div className="w-full max-w-2xl bg-black/30 rounded-3xl p-6 md:p-10 border border-white/10 shadow-2xl backdrop-blur-xl flex flex-col max-h-full">
                 <div className="flex flex-col md:flex-row justify-between items-start mb-6 gap-4 flex-none">
                     <div>
@@ -179,7 +179,7 @@ const RoomContent = () => {
                     </div>
                     <div className="flex flex-col md:flex-row gap-2 w-full md:w-auto">
                         <button
-                            onClick={() => router.push("/lobby")}
+                            onClick={() => window.location.href = "/Texas-Poker/lobby/"}
                             className="px-6 py-2 bg-white/5 hover:bg-white/10 text-white/60 hover:text-white rounded-full text-xs font-bold border border-white/5 transition-all"
                         >
                             ⬅️ 回大廳
