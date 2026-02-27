@@ -512,66 +512,66 @@ const GameBoard: React.FC<GameBoardProps> = ({ initialGameState, playerIndex, so
                             </div>
                         </div>
 
-                        {/* Winner Name & Message - Mega Typography & Zero Gap */}
+                        {/* Winner Name & Message - Refined Typography & Zero Gap */}
                         <div className="text-center w-full">
-                            <h3 className="text-white font-black text-3xl md:text-5xl tracking-tighter leading-none mb-1">
+                            <h3 className="text-white font-black text-2xl md:text-4xl tracking-tighter leading-none mb-1">
                                 恭喜獲得最後勝利！
                             </h3>
-                            <h2 className="text-yellow-500 font-extrabold text-5xl md:text-7xl tracking-widest leading-none">
+                            <h2 className="text-yellow-500 font-extrabold text-4xl md:text-6xl tracking-widest leading-none">
                                 {tournamentWinnerName}
                             </h2>
                         </div>
 
-                        {/* Stats Cards - Brick Style (No Gap) */}
+                        {/* Stats Cards - Brick Style (Reduced Padding) */}
                         <div className="flex flex-col w-full mt-4">
                             {/* Match Stats */}
-                            <div className="bg-white/10 border-x border-t border-white/20 rounded-t-[32px] p-6 backdrop-blur-md">
-                                <div className="text-sm md:text-lg text-white font-black uppercase tracking-widest mb-4 border-b border-white/10 pb-2 text-center">
+                            <div className="bg-white/10 border-x border-t border-white/20 rounded-t-[32px] p-4 backdrop-blur-md">
+                                <div className="text-sm md:text-base text-white font-black uppercase tracking-widest mb-3 border-b border-white/10 pb-2 text-center">
                                     本場戰報 (Current Match)
                                 </div>
                                 <div className="flex justify-around items-end">
                                     <div className="text-center">
-                                        <div className="text-white font-black text-3xl leading-none">{sessionStats.wins}</div>
-                                        <div className="text-[10px] text-white/40 uppercase mt-2 font-bold">勝局數</div>
+                                        <div className="text-white font-black text-2xl leading-none">{sessionStats.wins}</div>
+                                        <div className="text-[9px] text-white/40 uppercase mt-2 font-bold">勝局數</div>
                                     </div>
-                                    <div className="w-[1px] h-10 bg-white/20" />
+                                    <div className="w-[1px] h-8 bg-white/20" />
                                     <div className="text-center">
-                                        <div className="text-yellow-500 font-black text-3xl leading-none">
+                                        <div className="text-yellow-500 font-black text-2xl leading-none">
                                             {sessionStats.total > 0 ? Math.round((sessionStats.wins / sessionStats.total) * 100) : 0}%
                                         </div>
-                                        <div className="text-[10px] text-white/40 uppercase mt-2 font-bold">局勝率</div>
+                                        <div className="text-[9px] text-white/40 uppercase mt-2 font-bold">局勝率</div>
                                     </div>
                                 </div>
                             </div>
 
                             {/* Career Stats */}
-                            <div className="bg-yellow-500/10 border border-white/20 rounded-b-[32px] p-6 backdrop-blur-md">
-                                <div className="text-sm md:text-lg text-yellow-500 font-black uppercase tracking-widest mb-4 border-b border-yellow-500/10 pb-2 text-center">
+                            <div className="bg-yellow-500/10 border border-white/20 rounded-b-[32px] p-4 backdrop-blur-md">
+                                <div className="text-sm md:text-base text-yellow-500 font-black uppercase tracking-widest mb-3 border-b border-yellow-500/10 pb-2 text-center">
                                     生涯榮譽 (Lifetime Career)
                                 </div>
                                 <div className="grid grid-cols-2 gap-4">
                                     <div className="space-y-4 text-center">
                                         <div>
-                                            <div className="text-white font-black text-xl leading-none">{careerStats.matchWins}</div>
-                                            <div className="text-[10px] text-white/40 uppercase mt-1 font-bold">總冠軍數</div>
+                                            <div className="text-white font-black text-lg leading-none">{careerStats.matchWins}</div>
+                                            <div className="text-[9px] text-white/40 uppercase mt-1 font-bold">總冠軍數</div>
                                         </div>
                                         <div>
-                                            <div className="text-yellow-500 font-black text-xl leading-none">
+                                            <div className="text-yellow-500 font-black text-lg leading-none">
                                                 {careerStats.totalMatches > 0 ? Math.round((careerStats.matchWins / careerStats.totalMatches) * 100) : 0}%
                                             </div>
-                                            <div className="text-[10px] text-white/40 uppercase mt-1 font-bold">比賽勝率</div>
+                                            <div className="text-[9px] text-white/40 uppercase mt-1 font-bold">比賽勝率</div>
                                         </div>
                                     </div>
                                     <div className="space-y-4 text-center">
                                         <div>
-                                            <div className="text-white font-black text-xl leading-none">{careerStats.handWins + sessionStats.wins}</div>
-                                            <div className="text-[10px] text-white/40 uppercase mt-1 font-bold">總勝局數</div>
+                                            <div className="text-white font-black text-lg leading-none">{careerStats.handWins + sessionStats.wins}</div>
+                                            <div className="text-[9px] text-white/40 uppercase mt-1 font-bold">總勝局數</div>
                                         </div>
                                         <div>
-                                            <div className="text-yellow-500 font-black text-xl leading-none">
+                                            <div className="text-yellow-500 font-black text-lg leading-none">
                                                 {(careerStats.totalHands + sessionStats.total) > 0 ? Math.round(((careerStats.handWins + sessionStats.wins) / (careerStats.totalHands + sessionStats.total)) * 100) : 0}%
                                             </div>
-                                            <div className="text-[10px] text-white/40 uppercase mt-1 font-bold">總局勝率</div>
+                                            <div className="text-[9px] text-white/40 uppercase mt-1 font-bold">總局勝率</div>
                                         </div>
                                     </div>
                                 </div>
