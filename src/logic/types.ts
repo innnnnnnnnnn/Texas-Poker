@@ -6,6 +6,7 @@ export enum Suit {
 }
 
 export enum Rank {
+    Two = 2,
     Three = 3,
     Four = 4,
     Five = 5,
@@ -18,7 +19,6 @@ export enum Rank {
     Queen = 12,
     King = 13,
     Ace = 14,
-    Two = 15, // 2 is the largest
 }
 
 export interface Card {
@@ -27,36 +27,51 @@ export interface Card {
 }
 
 export enum HandType {
-    Single = 'Single',
-    Pair = 'Pair',
+    HighCard = 'HighCard',
+    OnePair = 'OnePair',
+    TwoPair = 'TwoPair',
+    ThreeOfAKind = 'ThreeOfAKind',
     Straight = 'Straight',
+    Flush = 'Flush',
     FullHouse = 'FullHouse',
-    FourOfAKind = 'FourOfAKind', // 鐵支
+    FourOfAKind = 'FourOfAKind',
     StraightFlush = 'StraightFlush',
+    RoyalFlush = 'RoyalFlush',
 }
+
+export type GamePhase = 'Waiting' | 'PreFlop' | 'Flop' | 'Turn' | 'River' | 'Showdown';
 
 export interface Player {
     id: string;
     name: string;
-    hand: Card[];
+    hand: Card[]; // Hole cards (2 cards)
     isHuman: boolean;
-    score: number;
+    chips: number;
+    isFolded: boolean;
+    isAllIn: boolean;
+    currentBet: number;
+    lastAction?: 'Fold' | 'Check' | 'Call' | 'Raise' | 'All-in' | 'Small Blind' | 'Big Blind';
 }
 
 export interface GameState {
     players: Player[];
+    communityCards: Card[];
     currentPlayerIndex: number;
-    tableHand: Hand | null;
-    lastPlayerIndex: number | null; // Index of the player who played the current table hand
-    roundWinnerIndex: number | null;
-    history: { playerIndex: number, hand: Hand | null }[];
+    dealerIndex: number;
+    pot: number;
+    smallBlind: number;
+    bigBlind: number;
+    phase: GamePhase;
+    currentMaxBet: number;
+    lastRaiserIndex: number | null;
+    winners: { playerId: string, amount: number, handName?: string }[];
     isFinished: boolean;
-    winners: string[]; // Order of finishing
+    history: string[]; // Log of actions
 }
 
-export interface Hand {
+export interface HandRank {
     type: HandType;
-    cards: Card[];
-    value: number; // A primary value for comparison within the same type
-    suitValue?: number; // Tie-breaker suit value
+    value: number; // Primary value for comparison
+    kickers: number[]; // Additional values for tie-breaking
+    cards: Card[]; // The 5 cards forming the hand
 }

@@ -16,7 +16,7 @@ const SignInPage = () => {
     // 如果已經登入，自動跳轉到大廳
     useEffect(() => {
         if (status === "authenticated") {
-            window.location.href = "/big2/lobby/";
+            window.location.href = "/texas/lobby/";
         }
     }, [status]);
 
@@ -50,9 +50,9 @@ const SignInPage = () => {
         <div className="min-h-screen bg-[#0a0a0a] flex flex-col items-center justify-center p-4">
             <div className="w-full max-w-md bg-[#1a1a1a] rounded-3xl p-8 border border-white/10 shadow-2xl">
                 <h1 className="text-4xl font-black text-center mb-2 bg-gradient-to-r from-yellow-400 to-yellow-600 bg-clip-text text-transparent">
-                    神貓大老二
+                    神貓德州撲克
                 </h1>
-                <p className="text-white/60 text-center mb-10">Shenmao Big Two Online</p>
+                <p className="text-white/60 text-center mb-10">Shenmao Texas Poker Online</p>
 
                 {liffError && (
                     <div className="mb-6 p-4 bg-red-500/20 border border-red-500/50 rounded-xl text-red-400 text-sm text-center">

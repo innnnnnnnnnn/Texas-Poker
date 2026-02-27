@@ -127,8 +127,9 @@ const RoomContent = () => {
             <div className="w-full max-w-2xl bg-black/30 rounded-3xl p-6 md:p-10 border border-white/10 shadow-2xl backdrop-blur-xl flex flex-col max-h-full">
                 <div className="flex flex-col md:flex-row justify-between items-start mb-6 gap-4 flex-none">
                     <div>
-                        <h1 className="text-xl md:text-3xl font-black text-white mb-1">房號: {roomId}</h1>
-                        <p className="text-yellow-500 text-sm font-bold">等待玩家加入中... ({players.length}/4)</p>
+                        <h2 className="text-xl md:text-2xl font-bold text-white">建立新局</h2>
+                        <p className="text-white/40 text-center text-sm md:text-base">建立一個德州撲克牌局，邀請好友或與 AI 對戰。</p>
+                        <p className="text-yellow-500 text-sm font-bold">房號: {roomId} (等待玩家加入中... {players.length}/8)</p>
                     </div>
                     <button
                         onClick={copyLink}
@@ -145,22 +146,22 @@ const RoomContent = () => {
                 )}
 
                 <div className="space-y-2 md:space-y-4 mb-6 overflow-y-auto flex-1 pr-2 scrollbar-hide">
-                    {[0, 1, 2, 3].map((i) => {
+                    {[0, 1, 2, 3, 4, 5, 6, 7].map((i) => {
                         const p = players[i];
                         return (
-                            <div key={i} className={`flex items-center justify-between p-3 md:p-4 rounded-2xl border ${p ? 'bg-black/40 border-white/20' : 'bg-black/10 border-white/5 border-dashed'}`}>
-                                <div className="flex items-center space-x-3 md:space-x-4">
-                                    <div className={`w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center text-lg ${p ? 'bg-yellow-500' : 'bg-white/5'}`}>
+                            <div key={i} className={`flex items-center justify-between p-2 md:p-3 rounded-xl border ${p ? 'bg-black/40 border-white/20' : 'bg-black/10 border-white/5 border-dashed opacity-50'}`}>
+                                <div className="flex items-center space-x-3">
+                                    <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm ${p ? 'bg-yellow-500' : 'bg-white/5'}`}>
                                         {p ? '👤' : ''}
                                     </div>
                                     <div>
-                                        <div className={`font-bold text-sm md:text-base ${p ? 'text-white' : 'text-white/20'}`}>
+                                        <div className={`font-bold text-xs md:text-sm ${p ? 'text-white' : 'text-white/20'}`}>
                                             {p ? p.name : '等待加入...'}
                                         </div>
-                                        {p?.isHost && <span className="text-[8px] md:text-[10px] bg-yellow-600 text-white px-2 py-0.5 rounded-full uppercase font-black">房主</span>}
+                                        {p?.isHost && <span className="text-[8px] bg-yellow-600 text-white px-2 py-0.5 rounded-full uppercase font-black">房主</span>}
                                     </div>
                                 </div>
-                                {p && <div className="text-green-500 font-bold text-sm">已就緒</div>}
+                                {p && <div className="text-green-500 font-bold text-[10px]">已就緒</div>}
                             </div>
                         );
                     })}
@@ -176,7 +177,7 @@ const RoomContent = () => {
                             <button
                                 key={diff.id}
                                 disabled={!currentIsHost}
-                                onClick={() => handleDifficultyChange(diff.id as any)}
+                                onClick={() => handleDifficultyChange(diff.id as 'Easy' | 'Medium' | 'Hard' | 'Expert' | 'Master')}
                                 className={`flex-1 min-w-[60px] py-2 rounded-xl font-black text-[10px] md:text-xs transition-all border-2 ${difficulty === diff.id
                                     ? `${diff.color} border-white text-white shadow-lg`
                                     : 'bg-black/40 border-transparent text-white/40 hover:bg-black/60'
@@ -199,8 +200,8 @@ const RoomContent = () => {
                     <div className="text-white/40 text-center font-bold text-sm flex-none">等待房主開始...</div>
                 )}
 
-                <p className="mt-6 text-center text-white/20 text-sm">
-                    真人人數不足四人時，系統將會自動由電腦補滿。
+                <p className="mt-6 text-center text-white/20 text-xs">
+                    支援最多 8 人對戰。人數不足 2 人時，系統會自動加入 AI 參與。
                 </p>
             </div>
         </div>

@@ -18,14 +18,14 @@ export const useAppSession = () => {
             console.log("[AppSession] Initializing...");
 
             // 1. Check LocalStorage first for high speed
-            const stored = localStorage.getItem("big2_user");
+            const stored = localStorage.getItem("texas_user");
             if (stored) {
                 try {
                     const parsed = JSON.parse(stored);
                     setUser(parsed);
                     setStatus("authenticated");
                     console.log("[AppSession] Authenticated via LocalStorage:", parsed.name);
-                } catch (e) {
+                } catch (_) {
                     console.error("[AppSession] LocalStorage parse error");
                 }
             }
@@ -40,7 +40,7 @@ export const useAppSession = () => {
                         console.log("[AppSession] LIFF Profile found:", profile.displayName);
 
                         const newUser = { id: `line_${profile.userId}`, name: profile.displayName };
-                        localStorage.setItem("big2_user", JSON.stringify(newUser));
+                        localStorage.setItem("texas_user", JSON.stringify(newUser));
                         setUser(newUser);
                         setStatus("authenticated");
                     } else if (!stored) {
@@ -61,21 +61,21 @@ export const useAppSession = () => {
     const login = (name: string) => {
         console.log("[AppSession] Logging in user:", name);
         const newUser = { id: `user_${Math.random().toString(36).substr(2, 9)}`, name };
-        localStorage.setItem("big2_user", JSON.stringify(newUser));
+        localStorage.setItem("texas_user", JSON.stringify(newUser));
         setUser(newUser);
         setStatus("authenticated");
     };
 
     const logout = () => {
         console.log("[AppSession] Logging out...");
-        localStorage.removeItem("big2_user");
+        localStorage.removeItem("texas_user");
         if (liffId && liff.isLoggedIn()) {
             liff.logout();
         }
         setUser(null);
         setStatus("unauthenticated");
         // Force redirect to signin
-        window.location.href = (process.env.NEXT_PUBLIC_BASE_PATH || "/big2") + "/auth/signin/";
+        window.location.href = (process.env.NEXT_PUBLIC_BASE_PATH || "/texas") + "/auth/signin/";
     };
 
     const sessionObject = useMemo(() => (user ? { user } : null), [user]);

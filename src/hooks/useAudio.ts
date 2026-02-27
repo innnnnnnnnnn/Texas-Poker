@@ -4,7 +4,8 @@ import { useEffect } from 'react';
 let audioCtx: AudioContext | null = null;
 const initAudio = () => {
     if (!audioCtx && typeof window !== 'undefined') {
-        const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+        // @ts-ignore - compatibility for older browsers
+        const AudioContextClass = (window as any).AudioContext || (window as any).webkitAudioContext;
         if (AudioContextClass) {
             audioCtx = new AudioContextClass();
         }

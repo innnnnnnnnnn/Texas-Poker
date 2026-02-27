@@ -1,18 +1,17 @@
 import { createServer } from "http";
 import { Server } from "socket.io";
-import { initializeGame, playTurn } from "../logic/game";
-import { GameState, Card, HandType } from "../logic/types";
-import { findValidPairs, findValidFiveCardHands } from "../logic/bigTwo";
+import { initializeGame, handleAction } from "../logic/game";
+import { GameState } from "../logic/types";
 
 const httpServer = createServer((req, res) => {
     if (req.url === "/") {
         res.writeHead(200);
-        res.end("Game server is running!");
+        res.end("Texas Poker server is running!");
     }
 });
 const io = new Server(httpServer, {
     cors: {
-        origin: "*", // Allow all for local dev
+        origin: "*",
         methods: ["GET", "POST"]
     }
 });
@@ -25,7 +24,7 @@ interface Room {
 }
 
 const rooms: Record<string, Room> = {};
-const playerRoomMap: Record<string, string> = {}; // socketId -> roomId
+const playerRoomMap: Record<string, string> = {};
 
 const DIFFICULTY_MAP = {
     'Easy': '簡單',
@@ -38,40 +37,29 @@ const DIFFICULTY_MAP = {
 io.on("connection", (socket) => {
     socket.on("join_room", (data: { roomId: string, name: string, userId: string }) => {
         const { roomId, name, userId } = data;
-
         if (!rooms[roomId]) {
             rooms[roomId] = { id: roomId, players: [], state: null, difficulty: 'Medium' };
         }
-
         const room = rooms[roomId];
-
-        // 檢查是否為重複加入 (Handle reconnection)
         const existingPlayerIndex = room.players.findIndex(p => p.id === userId);
 
         if (existingPlayerIndex !== -1) {
-            // 更新舊玩家的連線資訊，不改變位置與房主身分
             const oldSocketId = room.players[existingPlayerIndex].socketId;
             delete playerRoomMap[oldSocketId];
-
             room.players[existingPlayerIndex].socketId = socket.id;
-            room.players[existingPlayerIndex].name = name; // 可能改名
+            room.players[existingPlayerIndex].name = name;
             playerRoomMap[socket.id] = roomId;
-            console.log(`[Room] Player ${name} re-joined room ${roomId} (Maintains position ${existingPlayerIndex})`);
         } else {
-            // 新玩家加入
-            if (room.players.length >= 4) {
+            if (room.players.length >= 8) {
                 socket.emit("error", "房間已滿");
                 return;
             }
             const isHost = room.players.length === 0;
             room.players.push({ id: userId, name, socketId: socket.id, isHost });
             playerRoomMap[socket.id] = roomId;
-            console.log(`[Room] Player ${name} joined room ${roomId} (Host: ${isHost})`);
         }
 
         socket.join(roomId);
-
-        // 強制校正房主權限：確保第一個非 AI 玩家是 Host
         let hostAssigned = false;
         room.players.forEach((p) => {
             if (!p.isAI && !hostAssigned) {
@@ -89,33 +77,19 @@ io.on("connection", (socket) => {
         });
     });
 
-    socket.on("set_difficulty", (data: { roomId: string, difficulty: any }) => {
-        const room = rooms[data.roomId];
-        if (!room) return;
-        const player = room.players.find(p => p.socketId === socket.id);
-        if (!player || !player.isHost) return;
-
-        room.difficulty = data.difficulty;
-        io.to(data.roomId).emit("difficulty_update", room.difficulty);
-        console.log(`[Room] ${data.roomId} difficulty set to ${room.difficulty}`);
-    });
-
     socket.on("start_game", (data: { roomId: string }) => {
         const room = rooms[data.roomId];
         if (!room) return;
         if (room.state && !room.state.isFinished) return;
 
-        // Verify host
         const player = room.players.find(p => p.socketId === socket.id);
         if (!player || !player.isHost) return;
 
-        // BACKFILL AI if < 4 players
-        const currentCount = room.players.length;
-        if (currentCount < 4) {
-            for (let i = currentCount; i < 4; i++) {
+        if (room.players.length < 2) {
+            for (let i = room.players.length; i < 4; i++) {
                 room.players.push({
                     id: `ai_${i}`,
-                    name: `神貓 AI (${DIFFICULTY_MAP[room.difficulty]})`,
+                    name: `神貓 AI(${DIFFICULTY_MAP[room.difficulty]})`,
                     socketId: "",
                     isHost: false,
                     isAI: true
@@ -123,34 +97,13 @@ io.on("connection", (socket) => {
             }
         }
 
-        // 強制校正房主權限：AI 加入後確保第一個真人依舊是 Host
-        let hostAssigned = false;
-        room.players.forEach((p) => {
-            if (!p.isAI && !hostAssigned) {
-                p.isHost = true;
-                hostAssigned = true;
-            } else {
-                p.isHost = false;
-            }
-        });
-
-        // Broadcast room update so everyone sees AI players join
-        io.to(data.roomId).emit("room_update", {
-            players: room.players.map(p => ({ id: p.id, name: p.name, isHost: p.isHost, ready: true, isAI: p.isAI })),
-            count: room.players.length,
-            difficulty: room.difficulty
-        });
-
-        const playerInfos = room.players.map((p, i) => ({
+        const playerInfos = room.players.map((p) => ({
             name: p.name,
             isHuman: !p.isAI,
-            score: room.state ? room.state.players[i].score : 0
+            chips: 1000
         }));
         room.state = initializeGame(playerInfos);
 
-        console.log(`[Game] Room ${data.roomId} started. Starter: ${room.state.players[room.state.currentPlayerIndex].name}`);
-
-        // Send individual hands to human players
         room.players.forEach((p, index) => {
             if (p.socketId) {
                 io.to(p.socketId).emit("game_start", {
@@ -160,29 +113,25 @@ io.on("connection", (socket) => {
             }
         });
 
-        // Trigger AI with a delay if it's the starter
         if (room.state && !room.state.players[room.state.currentPlayerIndex].isHuman) {
-            const delay = room.difficulty === 'Easy' ? 2500 : room.difficulty === 'Hard' ? 800 : room.difficulty === 'Medium' ? 1500 : 400;
-            setTimeout(() => triggerAI(data.roomId), delay);
+            setTimeout(() => triggerAI(data.roomId), 1500);
         }
     });
 
-    socket.on("play_hand", (data: { cards: Card[] | null, roomId: string }) => {
+    socket.on("poker_action", (data: { action: string, amount?: number, roomId: string }) => {
         const room = rooms[data.roomId];
         if (!room || !room.state) return;
 
         const playerIndex = room.players.findIndex(p => p.socketId === socket.id);
         if (playerIndex === -1 || playerIndex !== room.state.currentPlayerIndex) return;
 
-        const result = playTurn(room.state, playerIndex, data.cards);
+        const result = handleAction(room.state, playerIndex, data.action, data.amount || 0);
         if (typeof result !== "string") {
             room.state = result;
             io.to(data.roomId).emit("state_update", result);
 
-            // Check if next player is AI
             if (!result.isFinished && !result.players[result.currentPlayerIndex].isHuman) {
-                const delay = room.difficulty === 'Easy' ? 2000 : room.difficulty === 'Hard' ? 600 : room.difficulty === 'Medium' ? 1000 : 300;
-                setTimeout(() => triggerAI(data.roomId), delay);
+                setTimeout(() => triggerAI(data.roomId), 1000);
             }
         } else {
             socket.emit("error", result);
@@ -195,115 +144,30 @@ io.on("connection", (socket) => {
 
         const aiIndex = room.state.currentPlayerIndex;
         const aiPlayer = room.state.players[aiIndex];
-
         if (aiPlayer.isHuman) return;
 
-        console.log(`[AI] ${aiPlayer.name} is thinking...`);
+        let action = "Check";
+        let amount = 0;
 
-        const hand = aiPlayer.hand;
-        let cardsToPlay: Card[] | null = null;
+        if (aiPlayer.currentBet < room.state.currentMaxBet) {
+            action = "Call";
+        }
 
-        if (room.state.tableHand === null) {
-            if (room.state.history.length === 0) {
-                // 第一手牌：必須包含梅花三
-                const threeOfClubs = hand.find(c => c.rank === 3 && c.suit === 0);
-                if (threeOfClubs) {
-                    // 優先找包含梅花三的 5 張組合
-                    const straights = findValidFiveCardHands(hand, null, HandType.Straight);
-                    const fullHouses = findValidFiveCardHands(hand, null, HandType.FullHouse);
-                    const allFives = [...straights, ...fullHouses].filter(f => f.some(c => c.rank === 3 && c.suit === 0));
-
-                    if (allFives.length > 0) {
-                        cardsToPlay = allFives[0];
-                    } else {
-                        const threes = hand.filter(c => c.rank === 3);
-                        if (threes.length >= 2) {
-                            cardsToPlay = [threes[0], threes[1]];
-                        } else {
-                            cardsToPlay = [threeOfClubs];
-                        }
-                    }
-                } else {
-                    cardsToPlay = [hand[0]];
-                }
-            } else {
-                // 新回合領先出牌：優先出 5 張組合（順子、葫蘆等）
-                const fullHouses = findValidFiveCardHands(hand, null, HandType.FullHouse);
-                const straights = findValidFiveCardHands(hand, null, HandType.Straight);
-
-                if (fullHouses.length > 0) cardsToPlay = fullHouses[0];
-                else if (straights.length > 0) cardsToPlay = straights[0];
-                else {
-                    const pairs = findValidPairs(hand, null);
-                    if (pairs.length > 0) cardsToPlay = pairs[0];
-                    else cardsToPlay = [hand[0]];
-                }
-            }
-        } else {
-            // 跟牌邏輯
-            const tableLen = room.state.tableHand.cards.length;
-            const tableType = room.state.tableHand.type;
-
-            if (tableLen === 5) {
-                // 尋找能壓過的 5 張牌
-                const typesToCheck = [HandType.Straight, HandType.FullHouse, HandType.FourOfAKind, HandType.StraightFlush];
-                for (const t of typesToCheck) {
-                    const combos = findValidFiveCardHands(hand, room.state.tableHand, t);
-                    if (combos.length > 0) {
-                        cardsToPlay = combos[0];
-                        break;
-                    }
-                }
-            } else if (tableLen === 2) {
-                const pairs = findValidPairs(hand, room.state.tableHand);
-                if (pairs.length > 0) cardsToPlay = pairs[0];
-                else {
-                    // 困難難度以上考慮用鐵支/同花順攔截 (Monsters)
-                    if (room.difficulty !== 'Easy' && room.difficulty !== 'Medium') {
-                        const monsters = [
-                            ...findValidFiveCardHands(hand, room.state.tableHand, HandType.FourOfAKind),
-                            ...findValidFiveCardHands(hand, room.state.tableHand, HandType.StraightFlush)
-                        ];
-                        if (monsters.length > 0) cardsToPlay = monsters[0];
-                    }
-                }
-            } else if (tableLen === 1) {
-                const tableVal = room.state.tableHand.value;
-                const tableSuit = room.state.tableHand.suitValue || 0;
-                const beat = hand.find(c => c.rank > tableVal || (c.rank === tableVal && c.suit > tableSuit));
-
-                if (beat) cardsToPlay = [beat];
-                else {
-                    // 攔截規則
-                    if (room.difficulty === 'Expert' || room.difficulty === 'Master') {
-                        const monsters = [
-                            ...findValidFiveCardHands(hand, room.state.tableHand, HandType.FourOfAKind),
-                            ...findValidFiveCardHands(hand, room.state.tableHand, HandType.StraightFlush)
-                        ];
-                        if (monsters.length > 0) cardsToPlay = monsters[0];
-                    }
-                }
+        if (Math.random() > 0.8) {
+            action = "Raise";
+            amount = room.state.currentMaxBet + 20;
+            if (amount > aiPlayer.chips) {
+                action = "All-in";
             }
         }
 
-        const result = playTurn(room.state, aiIndex, cardsToPlay);
+        console.log(`[AI] ${aiPlayer.name} takes action: ${action}`);
+        const result = handleAction(room.state, aiIndex, action, amount);
         if (typeof result !== "string") {
             room.state = result;
             io.to(roomId).emit("state_update", result);
-
             if (!result.isFinished && !result.players[result.currentPlayerIndex].isHuman) {
-                const delay = room.difficulty === 'Easy' ? 2000 : room.difficulty === 'Hard' ? 600 : room.difficulty === 'Medium' ? 1000 : 300;
-                setTimeout(() => triggerAI(roomId), delay);
-            }
-        } else {
-            const passResult = playTurn(room.state, aiIndex, null);
-            if (typeof passResult !== "string") {
-                room.state = passResult;
-                io.to(roomId).emit("state_update", passResult);
-                if (!passResult.isFinished && !passResult.players[passResult.currentPlayerIndex].isHuman) {
-                    const delay = room.difficulty === 'Easy' ? 2000 : room.difficulty === 'Hard' ? 600 : room.difficulty === 'Medium' ? 1000 : 300;
-                    setTimeout(() => triggerAI(roomId), delay);
-                }
+                setTimeout(() => triggerAI(roomId), 1000);
             }
         }
     };
@@ -319,7 +183,7 @@ io.on("connection", (socket) => {
     });
 });
 
-const PORT = process.env.PORT || 3002;
-httpServer.listen(PORT, () => {
-    console.log(`[Server] Game server is running on port ${PORT}`);
+const PORT = Number(process.env.PORT) || 3002;
+httpServer.listen(PORT, "0.0.0.0", () => {
+    console.log(`[Server] Poker server is running on port ${PORT}`);
 });
