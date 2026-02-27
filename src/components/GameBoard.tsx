@@ -147,11 +147,17 @@ const GameBoard: React.FC<GameBoardProps> = ({ initialGameState, playerIndex, so
                                 </div>
                             </div>
 
-                            {/* Cards for other players (on table) */}
+                            {/* Cards for other players (reveal on game finish) */}
                             {!isMe && !p.isFolded && (
                                 <div className="flex -space-x-6 mt-1 translate-y-[-4px]">
-                                    <Card isHidden className="scale-40 origin-top shadow-xl" />
-                                    <Card isHidden className="scale-40 origin-top shadow-xl" />
+                                    {gameState.isFinished ? (
+                                        p.hand.map((c, i) => <Card key={i} card={c} className="scale-40 origin-top shadow-xl" />)
+                                    ) : (
+                                        <>
+                                            <Card isHidden className="scale-40 origin-top shadow-xl" />
+                                            <Card isHidden className="scale-40 origin-top shadow-xl" />
+                                        </>
+                                    )}
                                 </div>
                             )}
 
