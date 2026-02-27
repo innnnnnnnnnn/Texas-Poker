@@ -86,7 +86,7 @@ const GameBoard: React.FC<GameBoardProps> = ({ initialGameState, playerIndex, so
             {/* Individually Positioned Center Components */}
 
             {/* 💰 Pot Display */}
-            <div className="absolute top-[28%] left-1/2 -translate-x-1/2 z-[140] pointer-events-none">
+            <div className="absolute top-[20%] left-1/2 -translate-x-1/2 z-[140] pointer-events-none">
                 <div className="bg-black/60 backdrop-blur-md px-8 py-3 rounded-full border border-yellow-500/30 flex flex-col items-center shadow-2xl">
                     <span className="text-white/40 text-[10px] uppercase font-bold tracking-tighter leading-none mb-1">Total Pot</span>
                     <span className="text-yellow-500 font-black text-2xl md:text-3xl tracking-wide leading-none">
@@ -96,14 +96,14 @@ const GameBoard: React.FC<GameBoardProps> = ({ initialGameState, playerIndex, so
             </div>
 
             {/* 📊 Phase & street info (Street Info) */}
-            <div className="absolute top-[35%] left-1/2 -translate-x-1/2 z-[140] pointer-events-none">
+            <div className="absolute top-[25%] left-1/2 -translate-x-1/2 z-[140] pointer-events-none">
                 <div className="bg-white/5 border border-white/10 px-6 py-2 rounded-full text-[10px] md:text-xs text-white/80 font-black uppercase tracking-widest backdrop-blur-md shadow-lg">
                     {gameState.phase} • {toCall > 0 ? `To Call: ${toCall}` : 'Check or Bet'}
                 </div>
             </div>
 
             {/* 🃏 Community Cards */}
-            <div className="absolute top-[48%] left-1/2 -translate-x-1/2 z-[140] pointer-events-none">
+            <div className="absolute top-[35%] left-1/2 -translate-x-1/2 z-[140] pointer-events-none">
                 <div className="flex space-x-2 md:space-x-3">
                     {gameState.communityCards.map((c, i) => (
                         <Card key={i} card={c} className="scale-90 md:scale-125 shadow-2xl" />
