@@ -183,19 +183,7 @@ io.on("connection", (socket) => {
             }
         });
 
-        // 3. Tournament Winner Detection
-        if (room.players.length <= 1) {
-            io.to(data.roomId).emit("tournament_winner", {
-                winner: room.players[0]?.name || "None",
-                stats: {
-                    matchWins: 1
-                }
-            });
-            room.state = null; // Reset
-            return;
-        }
-
-        // Fill with AI if necessary up to maxPlayers
+        // 3. Fill with AI if necessary up to maxPlayers
         if (room.players.length < room.maxPlayers) {
             const currentNonAI = room.players.filter(p => !p.isAI).length;
             const targetAI = room.maxPlayers - currentNonAI;
@@ -212,6 +200,18 @@ io.on("connection", (socket) => {
                     isAI: true
                 });
             }
+        }
+
+        // 4. Tournament Winner Detection
+        if (room.players.length <= 1) {
+            io.to(data.roomId).emit("tournament_winner", {
+                winner: room.players[0]?.name || "None",
+                stats: {
+                    matchWins: 1
+                }
+            });
+            room.state = null; // Reset
+            return;
         }
 
         const playerInfos = room.players.map((p) => {
