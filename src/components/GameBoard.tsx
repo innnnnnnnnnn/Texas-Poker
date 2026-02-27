@@ -61,13 +61,13 @@ const GameBoard: React.FC<GameBoardProps> = ({ initialGameState, playerIndex, so
         const relativeIndex = (index - playerIndex + 8) % 8;
         const positions = [
             { bottom: '5%', left: '50%', transform: 'translateX(-50%)' },           // Seat 0 (Me)
-            { bottom: '8%', left: '5%', transform: 'none' },                        // Seat 1 (Downstream 1)
+            { bottom: '5%', left: '5%', transform: 'none' },                        // Seat 1 (Downstream 1)
             { bottom: '24%', left: '2%', transform: 'none' },                       // Seat 2 (Downstream 2)
             { top: '14%', left: '5%', transform: 'none' },                         // Seat 3 (Downstream 3)
             { top: '5%', left: '50%', transform: 'translateX(-50%)' },              // Seat 4 (Top Center)
             { top: '14%', right: '5%', transform: 'none' },                        // Seat 5 (Upstream 3)
             { bottom: '24%', right: '2%', transform: 'none' },                      // Seat 6 (Upstream 2)
-            { bottom: '8%', right: '5%', transform: 'none' },                       // Seat 7 (Upstream 1)
+            { bottom: '5%', right: '5%', transform: 'none' },                       // Seat 7 (Upstream 1)
         ];
         return positions[relativeIndex];
     };
