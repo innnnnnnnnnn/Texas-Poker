@@ -149,12 +149,20 @@ const RoomContent = () => {
                         <p className="text-white/40 text-center text-sm md:text-base">建立一個德州撲克牌局，邀請好友或與 AI 對戰。</p>
                         <p className="text-yellow-500 text-sm font-bold">房號: {roomId} (等待玩家加入中... {players.length}/8)</p>
                     </div>
-                    <button
-                        onClick={copyLink}
-                        className="w-full md:w-auto px-6 py-2 bg-white/10 hover:bg-white/20 text-white rounded-full text-xs font-bold border border-white/10 transition-all"
-                    >
-                        📋 複製邀請連結
-                    </button>
+                    <div className="flex flex-col md:flex-row gap-2 w-full md:w-auto">
+                        <button
+                            onClick={() => router.push("/lobby")}
+                            className="px-6 py-2 bg-white/5 hover:bg-white/10 text-white/60 hover:text-white rounded-full text-xs font-bold border border-white/5 transition-all"
+                        >
+                            ⬅️ 回大廳
+                        </button>
+                        <button
+                            onClick={copyLink}
+                            className="px-6 py-2 bg-white/10 hover:bg-white/20 text-white rounded-full text-xs font-bold border border-white/10 transition-all"
+                        >
+                            📋 複製邀請連結
+                        </button>
+                    </div>
                 </div>
 
                 {connectionError && (
