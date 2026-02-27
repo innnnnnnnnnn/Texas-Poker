@@ -429,7 +429,7 @@ const GameBoard: React.FC<GameBoardProps> = ({ initialGameState, playerIndex, so
                     <div className="fixed inset-0 z-[190] bg-black/10 animate-in fade-in duration-500" />
 
                     {/* 結算控制卡片 - 位置與下注條完全同步 (Positioned like Action Bar) */}
-                    <div className="fixed bottom-32 md:bottom-36 left-1/2 -translate-x-1/2 z-[200] flex flex-col items-center w-[90%] md:w-[60%] pointer-events-none px-4">
+                    <div className="fixed bottom-32 md:bottom-36 left-1/2 -translate-x-1/2 z-[200] flex flex-col items-center w-[60%] pointer-events-none px-4">
                         <div className="w-full bg-black/60 backdrop-blur-3xl rounded-[32px] p-6 md:p-8 border border-white/20 shadow-[0_20px_80px_rgba(0,0,0,0.6)] pointer-events-auto flex flex-col items-center text-center animate-in fade-in zoom-in duration-300">
 
                             {/* 獲勝宣告組 (Winning Announcement Group) */}
