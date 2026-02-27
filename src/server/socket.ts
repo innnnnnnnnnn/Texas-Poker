@@ -124,9 +124,21 @@ io.on("connection", (socket) => {
 
         // Re-sync game state if game is in progress
         if (room.state && !room.state.isFinished) {
+            const playerInGameIdx = room.state.players.findIndex(p => p.name === name);
+            const playerIndex = playerInGameIdx; // -1 if spectator
+
+            // Mask state for new joiner
+            const maskedState = (playerIndex === -1) ? room.state : {
+                ...room.state,
+                players: room.state.players.map((sp, idx) => ({
+                    ...sp,
+                    hand: (idx === playerIndex) ? sp.hand : []
+                }))
+            };
+
             socket.emit("game_start", {
-                state: room.state,
-                playerIndex: existingPlayerIndex !== -1 ? existingPlayerIndex : room.players.length - 1
+                state: maskedState,
+                playerIndex: playerIndex
             });
         }
     });
@@ -232,7 +244,10 @@ io.on("connection", (socket) => {
         const room = rooms[data.roomId];
         if (!room || !room.state) return;
 
-        const playerIndex = room.players.findIndex(p => p.socketId === socket.id);
+        const playerInRoom = room.players.find(p => p.socketId === socket.id);
+        if (!playerInRoom) return;
+
+        const playerIndex = room.state.players.findIndex(p => p.name === playerInRoom.name);
         if (playerIndex === -1 || playerIndex !== room.state.currentPlayerIndex) return;
 
         const result = handleAction(room.state, playerIndex, data.action, data.amount || 0);

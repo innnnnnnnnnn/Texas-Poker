@@ -123,7 +123,9 @@ const GameBoard: React.FC<GameBoardProps> = ({ initialGameState, playerIndex, so
     }, [socket, playerIndex, playSound, roomId, gameState, sessionStats, careerStats, router]);
 
     const isMyTurn = gameState.currentPlayerIndex === playerIndex && !gameState.isFinished;
-    const me = gameState.players[playerIndex] || { chips: 0, currentBet: 0, name: 'Spectator', isFolded: true, hand: [] };
+    const me = (playerIndex !== -1 && gameState.players[playerIndex])
+        ? gameState.players[playerIndex]
+        : { id: 'spectator', name: '觀戰中', chips: 0, currentBet: 0, isFolded: true, isAllIn: false, hand: [] as CardType[] };
 
     // Mechanism: Smart Default Raise Amount
     useEffect(() => {
@@ -237,7 +239,7 @@ const GameBoard: React.FC<GameBoardProps> = ({ initialGameState, playerIndex, so
                                 <div className="flex justify-between items-center mb-1 px-0.5">
                                     <div className="w-5 h-5 md:w-6 md:h-6 rounded-full bg-gradient-to-br from-gray-700 to-black border border-white/10 flex items-center justify-center text-[10px]">{p.isHuman ? '👤' : '🤖'}</div>
                                     <div className="text-yellow-500 text-[10px] font-black tracking-tighter">
-                                        💰{p.chips.toLocaleString()}
+                                        💰{(p.chips || 0).toLocaleString()}
                                     </div>
                                 </div>
 
@@ -283,7 +285,7 @@ const GameBoard: React.FC<GameBoardProps> = ({ initialGameState, playerIndex, so
                             {gameState.players[viewFocusIndex]?.isHuman ? '👤' : '🤖'}
                         </div>
                         <div className="mt-1 text-center">
-                            <div className="text-yellow-500 font-black text-xs md:text-sm">💰 {gameState.players[viewFocusIndex]?.chips.toLocaleString()}</div>
+                            <div className="text-yellow-500 font-black text-xs md:text-sm">💰 {(gameState.players[viewFocusIndex]?.chips || 0).toLocaleString()}</div>
                         </div>
                     </div>
 
