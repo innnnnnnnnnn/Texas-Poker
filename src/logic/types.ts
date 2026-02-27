@@ -50,7 +50,7 @@ export interface Player {
     isFolded: boolean;
     isAllIn: boolean;
     currentBet: number;
-    lastAction?: 'Fold' | 'Check' | 'Call' | 'Raise' | 'All-in' | 'Small Blind' | 'Big Blind';
+    lastAction?: 'Fold' | 'Check' | 'Call' | 'Raise' | 'All-in' | 'SB' | 'BB';
 }
 
 export interface GameState {

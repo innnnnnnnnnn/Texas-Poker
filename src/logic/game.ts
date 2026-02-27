@@ -79,11 +79,11 @@ export function startNewRound(state: GameState): GameState {
     // Post blinds
     players[sbIndex].chips -= state.smallBlind;
     players[sbIndex].currentBet = state.smallBlind;
-    players[sbIndex].lastAction = 'Small Blind';
+    players[sbIndex].lastAction = 'SB';
 
     players[bbIndex].chips -= state.bigBlind;
     players[bbIndex].currentBet = state.bigBlind;
-    players[bbIndex].lastAction = 'Big Blind';
+    players[bbIndex].lastAction = 'BB';
 
     return {
         ...state,
