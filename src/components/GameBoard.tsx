@@ -61,13 +61,13 @@ const GameBoard: React.FC<GameBoardProps> = ({ initialGameState, playerIndex, so
         const relativeIndex = (index - playerIndex + 8) % 8;
         const positions = [
             { bottom: '15%', left: '50%', transform: 'translateX(-50%)' },          // Seat 0 (Me)
-            { bottom: '6%', left: '5%', transform: 'none' },                        // Seat 1 (Downstream 1)
+            { bottom: '7%', left: '5%', transform: 'none' },                        // Seat 1 (Downstream 1)
             { bottom: '28%', left: '2%', transform: 'none' },                       // Seat 2 (Downstream 2)
             { top: '12%', left: '5%', transform: 'none' },                         // Seat 3 (Downstream 3)
             { top: '5%', left: '50%', transform: 'translateX(-50%)' },              // Seat 4 (Top Center)
             { top: '12%', right: '5%', transform: 'none' },                        // Seat 5 (Upstream 3)
             { bottom: '28%', right: '2%', transform: 'none' },                      // Seat 6 (Upstream 2)
-            { bottom: '6%', right: '5%', transform: 'none' },                       // Seat 7 (Upstream 1)
+            { bottom: '7%', right: '5%', transform: 'none' },                       // Seat 7 (Upstream 1)
         ];
         return positions[relativeIndex];
     };
@@ -298,7 +298,7 @@ const GameBoard: React.FC<GameBoardProps> = ({ initialGameState, playerIndex, so
             <button
                 onClick={onExit}
                 className="fixed z-50 p-3 bg-black/40 backdrop-blur-md rounded-full border border-white/10 hover:bg-red-900/40 text-white/40 hover:text-white transition-all shadow-xl"
-                style={{ top: '5%', left: '5%' }}
+                style={{ bottom: '24px', left: '24px' }}
                 title="Exit Game"
             >
                 🚪
