@@ -21,6 +21,7 @@ interface Room {
     players: { id: string, name: string, socketId: string, isHost: boolean, isAI?: boolean }[];
     state: GameState | null;
     difficulty: 'Easy' | 'Medium' | 'Hard' | 'Expert' | 'Master';
+    maxPlayers: number;
 }
 
 const rooms: Record<string, Room> = {};
@@ -38,7 +39,7 @@ io.on("connection", (socket) => {
     socket.on("join_room", (data: { roomId: string, name: string, userId: string }) => {
         const { roomId, name, userId } = data;
         if (!rooms[roomId]) {
-            rooms[roomId] = { id: roomId, players: [], state: null, difficulty: 'Medium' };
+            rooms[roomId] = { id: roomId, players: [], state: null, difficulty: 'Medium', maxPlayers: 4 };
         }
         const room = rooms[roomId];
         const existingPlayerIndex = room.players.findIndex(p => p.id === userId);
@@ -73,8 +74,19 @@ io.on("connection", (socket) => {
         io.to(roomId).emit("room_update", {
             players: room.players.map(p => ({ id: p.id, name: p.name, isHost: p.isHost, ready: true, isAI: p.isAI })),
             count: room.players.length,
-            difficulty: room.difficulty
+            difficulty: room.difficulty,
+            maxPlayers: room.maxPlayers
         });
+    });
+
+    socket.on("set_max_players", (data: { roomId: string, maxPlayers: number }) => {
+        const room = rooms[data.roomId];
+        if (!room) return;
+        const player = room.players.find(p => p.socketId === socket.id);
+        if (!player || !player.isHost) return;
+
+        room.maxPlayers = Math.max(2, Math.min(8, data.maxPlayers));
+        io.to(data.roomId).emit("max_players_update", room.maxPlayers);
     });
 
     socket.on("start_game", (data: { roomId: string }) => {
@@ -85,11 +97,18 @@ io.on("connection", (socket) => {
         const player = room.players.find(p => p.socketId === socket.id);
         if (!player || !player.isHost) return;
 
-        if (room.players.length < 2) {
-            for (let i = room.players.length; i < 4; i++) {
+        // Fill with AI if necessary up to maxPlayers
+        if (room.players.length < room.maxPlayers) {
+            const currentNonAI = room.players.filter(p => !p.isAI).length;
+            const targetAI = room.maxPlayers - currentNonAI;
+
+            // Remove existing AIs if they exceed the new max
+            room.players = room.players.filter(p => !p.isAI);
+
+            for (let i = 0; i < targetAI; i++) {
                 room.players.push({
-                    id: `ai_${i}`,
-                    name: `神貓 AI(${DIFFICULTY_MAP[room.difficulty]})`,
+                    id: `ai_${room.players.length}`,
+                    name: `神貓 AI-${room.players.length + 1}`,
                     socketId: "",
                     isHost: false,
                     isAI: true

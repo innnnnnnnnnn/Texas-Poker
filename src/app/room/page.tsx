@@ -19,6 +19,7 @@ const RoomContent = () => {
     const [gameState, setGameState] = useState<GameState | null>(null);
     const [playerIndex, setPlayerIndex] = useState<number>(-1);
     const [difficulty, setDifficulty] = useState<'Easy' | 'Medium' | 'Hard' | 'Expert' | 'Master'>('Medium');
+    const [maxPlayers, setMaxPlayers] = useState<number>(4);
     const [connectionError, setConnectionError] = useState<string | null>(null);
 
     const myId = (session?.user as any)?.id;
@@ -70,11 +71,16 @@ const RoomContent = () => {
         socket.on("room_update", (data) => {
             setPlayers(data.players);
             if (data.difficulty) setDifficulty(data.difficulty);
+            if (data.maxPlayers) setMaxPlayers(data.maxPlayers);
             console.log("[Room] Updated players list. My ID:", myId);
         });
 
         socket.on("difficulty_update", (newDiff: any) => {
             setDifficulty(newDiff);
+        });
+
+        socket.on("max_players_update", (newMax: number) => {
+            setMaxPlayers(newMax);
         });
 
         socket.on("game_start", (data: { state: GameState, playerIndex: number }) => {
@@ -100,6 +106,11 @@ const RoomContent = () => {
     const handleDifficultyChange = (newDiff: 'Easy' | 'Medium' | 'Hard' | 'Expert' | 'Master') => {
         setDifficulty(newDiff);
         socket.emit("set_difficulty", { roomId, difficulty: newDiff });
+    };
+
+    const handleMaxPlayersChange = (newMax: number) => {
+        setMaxPlayers(newMax);
+        socket.emit("set_max_players", { roomId, maxPlayers: newMax });
     };
 
     const copyLink = () => {
@@ -174,25 +185,55 @@ const RoomContent = () => {
                     })}
                 </div>
 
-                {/* AI Difficulty Selector */}
-                <div className="mb-6 bg-black/20 p-4 md:p-6 rounded-2xl border border-white/5 flex-none">
-                    <h2 className="text-white text-sm font-bold mb-3 flex items-center">
-                        🤖 電腦難度
-                    </h2>
-                    <div className="flex flex-wrap gap-2">
-                        {difficulties.map((diff) => (
-                            <button
-                                key={diff.id}
+                {/* Room Settings */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6 flex-none">
+                    {/* AI Difficulty Selector */}
+                    <div className="bg-black/20 p-4 rounded-2xl border border-white/5">
+                        <h2 className="text-white text-[10px] font-black mb-3 flex items-center uppercase tracking-widest opacity-40">
+                            🤖 AI 難度
+                        </h2>
+                        <div className="flex flex-wrap gap-1.5">
+                            {difficulties.map((diff) => (
+                                <button
+                                    key={diff.id}
+                                    disabled={!currentIsHost}
+                                    onClick={() => handleDifficultyChange(diff.id as 'Easy' | 'Medium' | 'Hard' | 'Expert' | 'Master')}
+                                    className={`flex-1 min-w-[50px] py-2 rounded-xl font-black text-[10px] transition-all border-2 ${difficulty === diff.id
+                                        ? `${diff.color} border-white text-white shadow-lg`
+                                        : 'bg-black/40 border-transparent text-white/20 hover:bg-black/60'
+                                        } ${!currentIsHost && 'cursor-default opacity-50'}`}
+                                >
+                                    {diff.name}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Max Players Slider */}
+                    <div className="bg-black/20 p-4 rounded-2xl border border-white/5">
+                        <div className="flex justify-between items-center mb-3">
+                            <h2 className="text-white text-[10px] font-black flex items-center uppercase tracking-widest opacity-40">
+                                👥 遊戲人數設定
+                            </h2>
+                            <span className="text-yellow-500 font-black text-sm">{maxPlayers} 人</span>
+                        </div>
+                        <div className="px-2">
+                            <input
+                                type="range"
+                                min="2"
+                                max="8"
+                                step="1"
                                 disabled={!currentIsHost}
-                                onClick={() => handleDifficultyChange(diff.id as 'Easy' | 'Medium' | 'Hard' | 'Expert' | 'Master')}
-                                className={`flex-1 min-w-[60px] py-2 rounded-xl font-black text-[10px] md:text-xs transition-all border-2 ${difficulty === diff.id
-                                    ? `${diff.color} border-white text-white shadow-lg`
-                                    : 'bg-black/40 border-transparent text-white/40 hover:bg-black/60'
-                                    } ${!currentIsHost && 'cursor-default'}`}
-                            >
-                                {diff.name}
-                            </button>
-                        ))}
+                                value={maxPlayers}
+                                onChange={(e) => handleMaxPlayersChange(Number(e.target.value))}
+                                className={`w-full h-2 bg-white/10 rounded-full appearance-none cursor-pointer accent-yellow-500 ${!currentIsHost && 'opacity-50 cursor-default'}`}
+                            />
+                            <div className="flex justify-between mt-2 text-[8px] text-white/20 font-black">
+                                <span>2人</span>
+                                <span>8人</span>
+                            </div>
+                        </div>
+                        <p className="text-[9px] text-white/30 mt-2 italic text-center">不足的人數將會由 AI 遞補</p>
                     </div>
                 </div>
 
@@ -204,7 +245,7 @@ const RoomContent = () => {
                         開始遊戲 (START)
                     </button>
                 ) : (
-                    <div className="text-white/40 text-center font-bold text-sm flex-none">等待房主開始...</div>
+                    <div className="text-white/40 text-center font-bold text-sm flex-none border-2 border-dashed border-white/5 py-4 rounded-2xl italic">等待房主開始...</div>
                 )}
 
                 <p className="mt-6 text-center text-white/20 text-xs">
